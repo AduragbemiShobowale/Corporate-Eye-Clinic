@@ -1,0 +1,384 @@
+/* ═══════════════════════════════════════════════════════════════
+   SHOP HERO
+═══════════════════════════════════════════════════════════════ */
+.shop-hero {
+  position: relative;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-block: var(--space-16);
+}
+
+.shop-hero__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    #021a30 0%,
+    #042c53 40%,
+    #085041 75%,
+    #0f6e56 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 12s ease infinite;
+}
+
+.shop-hero__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.shop-hero__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+.shop-hero__orb--1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    rgba(29, 158, 117, 0.28) 0%,
+    transparent 70%
+  );
+  top: -100px;
+  right: -50px;
+  animation: floatSlow 10s ease-in-out infinite;
+}
+.shop-hero__orb--2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(24, 95, 165, 0.2) 0%,
+    transparent 70%
+  );
+  bottom: -80px;
+  left: 5%;
+  animation: floatSlow 13s ease-in-out infinite reverse;
+}
+
+/* Centre decorative rings */
+.shop-hero__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(159, 225, 203, 0.15);
+  pointer-events: none;
+}
+.shop-hero__ring--1 {
+  width: 420px;
+  height: 420px;
+  animation: rotateGlobe 30s linear infinite;
+}
+.shop-hero__ring--2 {
+  width: 600px;
+  height: 600px;
+  border-style: solid;
+  border-color: rgba(159, 225, 203, 0.06);
+  animation: rotateGlobe 45s linear infinite reverse;
+}
+
+/* Floating glasses */
+.shop-hero__glasses {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.shop-hero__glasses--1 {
+  width: 160px;
+  top: 12%;
+  left: 4%;
+  animation: float 6s ease-in-out infinite 0s;
+  transform: rotate(-12deg);
+}
+.shop-hero__glasses--2 {
+  width: 140px;
+  bottom: 15%;
+  left: 8%;
+  animation: float 7s ease-in-out infinite 0.5s;
+  transform: rotate(8deg);
+}
+.shop-hero__glasses--3 {
+  width: 120px;
+  top: 10%;
+  right: 6%;
+  animation: float 5.5s ease-in-out infinite 1s;
+  transform: rotate(15deg);
+}
+.shop-hero__glasses--4 {
+  width: 100px;
+  bottom: 12%;
+  right: 4%;
+  animation: float 8s ease-in-out infinite 0.3s;
+  transform: rotate(-8deg);
+  opacity: 0.35;
+}
+.shop-hero__glasses--5 {
+  width: 80px;
+  top: 50%;
+  left: 18%;
+  animation: float 6.5s ease-in-out infinite 1.5s;
+  transform: translateY(-50%) rotate(5deg);
+  opacity: 0.45;
+}
+.shop-hero__glasses--6 {
+  width: 90px;
+  top: 45%;
+  right: 16%;
+  animation: float 7.5s ease-in-out infinite 0.8s;
+  transform: translateY(-50%) rotate(-10deg);
+  opacity: 0.35;
+}
+
+/* Hero text */
+.shop-hero__inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 560px;
+}
+
+.shop-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  animation: fadeUp 0.6s 0.1s both;
+}
+
+.shop-hero__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal-200);
+  display: inline-block;
+  animation: pulse-ring 2s ease infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(159, 225, 203, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(159, 225, 203, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(159, 225, 203, 0);
+  }
+}
+
+.shop-hero__title {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.15;
+  margin: 0;
+  animation: fadeUp 0.7s 0.2s both;
+}
+
+.shop-hero__subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.7;
+  margin: 0;
+  animation: fadeUp 0.7s 0.3s both;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROMO BAR
+═══════════════════════════════════════════════════════════════ */
+.shop-promo {
+  background: var(--amber-50);
+  border-bottom: 1px solid rgba(186, 117, 23, 0.2);
+  padding: var(--space-3) var(--space-4);
+}
+.shop-promo__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-8);
+}
+.shop-promo__text {
+  font-size: 0.875rem;
+  color: var(--amber-700);
+}
+.shop-promo__text code {
+  background: rgba(186, 117, 23, 0.15);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FILTERS
+═══════════════════════════════════════════════════════════════ */
+.shop__filters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-8);
+}
+.shop__filter-btn {
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: var(--white);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.shop__filter-btn:hover {
+  border-color: var(--teal-600);
+  color: var(--teal-700);
+}
+.shop__filter-btn.active {
+  background: var(--teal-700);
+  border-color: var(--teal-700);
+  color: var(--white);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCT GRID
+═══════════════════════════════════════════════════════════════ */
+.shop__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  margin-bottom: var(--space-10);
+  align-items: stretch;
+}
+
+.shop__card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.shop__card-img {
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.shop__card-body {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-height: 0;
+}
+
+.shop__tag {
+  align-self: flex-start;
+}
+.shop__card-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.shop__card-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--teal-700);
+}
+
+.shop__add-btn {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  width: 100%;
+  justify-content: center;
+}
+
+.shop__empty {
+  text-align: center;
+  padding: var(--space-16) 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELP NOTE
+═══════════════════════════════════════════════════════════════ */
+.shop__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  background: var(--teal-50);
+  border-color: rgba(15, 110, 86, 0.15);
+}
+.shop__note h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.shop__note p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .shop__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .shop-hero__glasses--5,
+  .shop-hero__glasses--6 {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .shop-hero {
+    min-height: 280px;
+  }
+  .shop-hero__glasses--2,
+  .shop-hero__glasses--4 {
+    display: none;
+  }
+  .shop-hero__glasses--1 {
+    width: 110px;
+  }
+  .shop-hero__glasses--3 {
+    width: 90px;
+  }
+}
+@media (max-width: 560px) {
+  .shop__grid {
+    grid-template-columns: 1fr;
+  }
+  .shop-promo__inner {
+    padding-inline: var(--space-4);
+  }
+  .shop__note {
+    flex-direction: column;
+  }
+}
