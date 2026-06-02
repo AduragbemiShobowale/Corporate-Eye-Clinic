@@ -1,34 +1,65 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import BookingModal from "../components/ui/BookingModal";
 import { team, stats } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import "./AboutPage.css";
 
 export default function AboutPage() {
+  const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <div className="page-hero">
-        <span className="about-hero__eyebrow">
-          <span className="about-hero__pulse" /> Est. 2001 · Ibadan, Nigeria
-        </span>
-        <h1>About Us</h1>
-        <p>Affordable, high-quality eye care for Ibadan since 2001.</p>
+      {/* ── Photo Hero (Eye Foundation style) ── */}
+      <div className="page-hero about-page-hero">
+        <div className="page-hero__photo" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=1600&q=85"
+            alt=""
+          />
+        </div>
+        <div className="page-hero__overlay" aria-hidden="true" />
+        <div className="page-hero__content">
+          <span className="page-hero__badge">
+            ✦ Est. 2001 · Ibadan, Nigeria
+          </span>
+          <h1>
+            About <span>Us</span>
+          </h1>
+          <p>
+            An overview of our history, mission, values, and the team behind
+            Corporate Eye Clinic.
+          </p>
+          <div className="about-hero__actions">
+            <button
+              className="btn btn--white btn--lg"
+              onClick={() => setShowModal(true)}
+            >
+              Book an appointment
+            </button>
+            <Link to="/services" className="btn btn--outline-white btn--lg">
+              Our services
+            </Link>
+          </div>
+        </div>
       </div>
 
       <MissionSection />
       <FunStatsSection />
       <TeamSection />
       <LocationsSection />
-      <CtaSection />
+      <CtaSection onBook={() => setShowModal(true)} />
+      {showModal && <BookingModal onClose={() => setShowModal(false)} />}
     </>
   );
 }
 
-/* ─── Mission ───────────────────────────────────────────────── */
+/* ─── Mission ─────────────────────────────────────────────── */
 function MissionSection() {
   const leftRef = useScrollReveal({ threshold: 0.1 });
   const rightRef = useScrollReveal({ threshold: 0.1 });
   return (
     <section className="section about-mission-section">
+      {/* Decorative animated elements stay in the body */}
       <div className="about-deco about-deco--1" aria-hidden="true">
         <GlassesSVG />
       </div>
@@ -79,7 +110,7 @@ function MissionSection() {
             {
               title: "Professionalism",
               emoji: "⚕️",
-              desc: "Our staff are vaccinated, qualified, and committed to the highest clinical standards.",
+              desc: "Our staff are qualified and committed to the highest clinical standards.",
             },
           ].map((v) => (
             <div
@@ -97,7 +128,7 @@ function MissionSection() {
   );
 }
 
-/* ─── Fun Stats ─────────────────────────────────────────────── */
+/* ─── Fun Stats ───────────────────────────────────────────── */
 function FunStatsSection() {
   const ref = useScrollReveal({ threshold: 0.1 });
   return (
@@ -129,22 +160,26 @@ function FunStatsSection() {
           {
             value: "2001",
             label: "Year established",
-            color: "#9FE1CB",
+            emoji: "📅",
+            color: "var(--amber-300)",
           },
           {
             value: "3",
             label: "Clinic locations",
-            color: "#C9A84C",
+            emoji: "🏥",
+            color: "var(--white)",
           },
           {
             value: "20+",
             label: "Years of care",
-            color: "#9FE1CB",
+            emoji: "❤️",
+            color: "var(--amber-300)",
           },
           {
             value: "5★",
             label: "Patient rated",
-            color: "#C9A84C",
+            emoji: "⭐",
+            color: "var(--white)",
           },
         ].map((s) => (
           <div key={s.label} className="about-fun-stat">
@@ -160,7 +195,7 @@ function FunStatsSection() {
   );
 }
 
-/* ─── Team ──────────────────────────────────────────────────── */
+/* ─── Team ────────────────────────────────────────────────── */
 function TeamSection() {
   const ref = useScrollReveal({ threshold: 0.1 });
   return (
@@ -175,9 +210,13 @@ function TeamSection() {
           {team.map((member) => (
             <div key={member.name} className="card about-team__card">
               <div className="about-team__avatar-wrap">
-                <div className="about-team__avatar" aria-hidden="true">
-                  {member.initials}
-                </div>
+                {member.photo ? (
+                  <div className="about-team__avatar-img">
+                    <img src={member.photo} alt={member.name} />
+                  </div>
+                ) : (
+                  <div className="about-team__avatar">{member.initials}</div>
+                )}
                 <div className="about-team__avatar-ring" aria-hidden="true" />
                 <span className="about-team__avatar-badge">👨‍⚕️</span>
               </div>
@@ -201,7 +240,7 @@ function TeamSection() {
   );
 }
 
-/* ─── Locations ─────────────────────────────────────────────── */
+/* ─── Locations ───────────────────────────────────────────── */
 function LocationsSection() {
   const ref = useScrollReveal({ threshold: 0.05 });
   const locations = [
@@ -268,8 +307,8 @@ function LocationsSection() {
   );
 }
 
-/* ─── CTA ───────────────────────────────────────────────────── */
-function CtaSection() {
+/* ─── CTA ─────────────────────────────────────────────────── */
+function CtaSection({ onBook }) {
   return (
     <section className="section about-cta">
       <div className="about-cta__bg" aria-hidden="true">
@@ -320,9 +359,9 @@ function CtaSection() {
             flexWrap: "wrap",
           }}
         >
-          <Link to="/contact" className="btn btn--white btn--lg">
+          <button className="btn btn--white btn--lg" onClick={onBook}>
             Book an appointment
-          </Link>
+          </button>
           <a
             href="https://wa.me/2348033372738"
             target="_blank"
@@ -337,7 +376,7 @@ function CtaSection() {
   );
 }
 
-/* ─── SVG Icons ─────────────────────────────────────────────── */
+/* ─── SVG decorations (in body, not hero) ────────────────── */
 function BigEyeSVG() {
   return (
     <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -364,7 +403,6 @@ function BigEyeSVG() {
     </svg>
   );
 }
-
 function GlassesSVG() {
   return (
     <svg viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -418,7 +456,6 @@ function GlassesSVG() {
     </svg>
   );
 }
-
 function HeartEyeSVG() {
   return (
     <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -439,7 +476,6 @@ function HeartEyeSVG() {
     </svg>
   );
 }
-
 function StarSVG() {
   return (
     <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -454,7 +490,6 @@ function StarSVG() {
     </svg>
   );
 }
-
 function PlusSVG() {
   return (
     <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

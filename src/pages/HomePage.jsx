@@ -88,7 +88,7 @@ export default function HomePage() {
       <HeroSection onBook={() => setShowModal(true)} />
       <TrustBar />
       <WelcomeSection onBook={() => setShowModal(true)} />
-      <VisionSliderSection />
+      <VisionSliderSection onBook={() => setShowModal(true)} />
       <ServicesSection />
       <ConditionsSection onBook={() => setShowModal(true)} />
       <TestimonialsSection />
@@ -103,6 +103,14 @@ export default function HomePage() {
 function HeroSection({ onBook }) {
   return (
     <section className="hero">
+      {/* Real photo background — corporate feel */}
+      <div className="hero__photo-bg" aria-hidden="true">
+        <img
+          src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1600&q=85"
+          alt=""
+        />
+      </div>
+      <div className="hero__photo-overlay" aria-hidden="true" />
       <div className="hero__gradient" aria-hidden="true" />
       <div className="hero__grid-pattern" aria-hidden="true" />
       <div className="hero__orb hero__orb--1" aria-hidden="true" />
@@ -124,7 +132,7 @@ function HeroSection({ onBook }) {
               >
                 <path
                   d="M2 9C50 3 100 1 150 6C200 11 250 9 298 5"
-                  stroke="var(--teal-100)"
+                  stroke="var(--amber-400)"
                   strokeWidth="3"
                   strokeLinecap="round"
                   fill="none"
@@ -200,7 +208,7 @@ function HeroSection({ onBook }) {
   );
 }
 
-/* ─── Trust Bar ────────────────────────────────────────────── */
+/* ─── Trust Bar ─────────────────────────────────────────────── */
 function TrustBar() {
   const ref = useScrollReveal();
   return (
@@ -223,7 +231,7 @@ function TrustBar() {
   );
 }
 
-/* ─── Welcome ──────────────────────────────────────────────── */
+/* ─── Welcome ────────────────────────────────────────────────── */
 function WelcomeSection({ onBook }) {
   const textRef = useScrollReveal({ threshold: 0.1 });
   const imgRef = useScrollReveal({ threshold: 0.1 });
@@ -281,12 +289,11 @@ function WelcomeSection({ onBook }) {
   );
 }
 
-/* ─── Vision Defects Slider ────────────────────────────────── */
-function VisionSliderSection() {
+/* ─── Vision Slider ──────────────────────────────────────────── */
+function VisionSliderSection({ onBook }) {
   const [active, setActive] = useState(0);
   const ref = useScrollReveal({ threshold: 0.1 });
   const condition = EYE_CONDITIONS[active];
-
   return (
     <section className="section vision-section">
       <div className="container">
@@ -300,7 +307,6 @@ function VisionSliderSection() {
             Early detection and treatment can preserve your vision.
           </p>
         </div>
-
         <div className="vision-tabs">
           {EYE_CONDITIONS.map((c, i) => (
             <button
@@ -313,7 +319,6 @@ function VisionSliderSection() {
             </button>
           ))}
         </div>
-
         <div className="vision-slider-wrap">
           <div className="vision-slider-container">
             <BeforeAfterSlider
@@ -329,9 +334,9 @@ function VisionSliderSection() {
           <div className="vision-info">
             <div className="vision-info__badge">{condition.label}</div>
             <p className="vision-info__desc">{condition.description}</p>
-            <Link to="/contact" className="btn btn--primary">
+            <button className="btn btn--primary" onClick={onBook}>
               Get screened today →
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -339,7 +344,7 @@ function VisionSliderSection() {
   );
 }
 
-/* ─── Services ─────────────────────────────────────────────── */
+/* ─── Services ───────────────────────────────────────────────── */
 function ServicesSection() {
   const headRef = useScrollReveal();
   const gridRef = useScrollReveal({ threshold: 0.05 });
@@ -378,7 +383,7 @@ function ServicesSection() {
   );
 }
 
-/* ─── Conditions ───────────────────────────────────────────── */
+/* ─── Conditions ─────────────────────────────────────────────── */
 function ConditionsSection({ onBook }) {
   const leftRef = useScrollReveal();
   const rightRef = useScrollReveal();
@@ -429,7 +434,7 @@ function ConditionsSection({ onBook }) {
   );
 }
 
-/* ─── Testimonials ─────────────────────────────────────────── */
+/* ─── Testimonials ───────────────────────────────────────────── */
 function TestimonialsSection() {
   const headRef = useScrollReveal();
   const gridRef = useScrollReveal({ threshold: 0.05 });
@@ -467,7 +472,7 @@ function TestimonialsSection() {
   );
 }
 
-/* ─── FAQ ──────────────────────────────────────────────────── */
+/* ─── FAQ ────────────────────────────────────────────────────── */
 function FaqSection() {
   const ref = useScrollReveal({ threshold: 0.05 });
   return (
@@ -495,7 +500,7 @@ function FaqSection() {
   );
 }
 
-/* ─── Shop CTA ─────────────────────────────────────────────── */
+/* ─── Shop CTA ───────────────────────────────────────────────── */
 function ShopCta() {
   const ref = useScrollReveal();
   return (
@@ -540,7 +545,7 @@ function ShopCta() {
   );
 }
 
-/* ─── Eye Illustration ─────────────────────────────────────── */
+/* ─── Eye Illustration ───────────────────────────────────────── */
 function EyeIllustration() {
   return (
     <svg
@@ -648,7 +653,6 @@ function EyeIllustration() {
   );
 }
 
-/* ─── Icons ────────────────────────────────────────────────── */
 const ArrowRight = ({ size = 15 }) => (
   <svg
     width={size}

@@ -382,3 +382,16 @@
     flex-direction: column;
   }
 }
+
+/* ─── Photo Hero override (replaces animated hero) ─────────── */
+.shop-page-hero {
+  min-height: 320px;
+  padding-block: var(--space-20);
+}
+.shop-page-hero .page-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}

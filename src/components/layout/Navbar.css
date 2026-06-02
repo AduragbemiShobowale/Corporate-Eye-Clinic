@@ -1,13 +1,17 @@
+/* ─── Navbar Shell ────────────────────────────────────────────── */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 200;
-  background: var(--white);
-  border-bottom: 0.5px solid var(--color-border);
-  transition: box-shadow var(--transition);
+  background: var(--navy-800);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition:
+    box-shadow var(--transition),
+    background var(--transition);
 }
 .navbar--scrolled {
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  background: var(--navy-900);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
 }
 
 .navbar__inner {
@@ -17,16 +21,17 @@
   gap: var(--space-8);
 }
 
-/* ─── Logo ────────────────────────────────────────────────── */
+/* ─── Logo ────────────────────────────────────────────────────── */
 .navbar__logo {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--teal-700);
+  color: var(--white);
   flex-shrink: 0;
   text-decoration: none;
+  letter-spacing: -0.01em;
 }
 .navbar__logo-icon {
   width: 36px;
@@ -38,9 +43,10 @@
   justify-content: center;
   color: var(--white);
   flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.3);
 }
 
-/* ─── Desktop Nav ─────────────────────────────────────────── */
+/* ─── Desktop Nav ─────────────────────────────────────────────── */
 .navbar__nav {
   display: flex;
   align-items: center;
@@ -55,7 +61,7 @@
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--gray-500);
+  color: rgba(255, 255, 255, 0.72);
   background: none;
   cursor: pointer;
   transition:
@@ -63,6 +69,7 @@
     background var(--transition);
   white-space: nowrap;
   text-decoration: none;
+  border: none;
 }
 .navbar__link--btn {
   border: none;
@@ -70,11 +77,11 @@
 .navbar__link:hover,
 .navbar__link--active,
 .navbar__link.active {
-  color: var(--teal-700);
-  background: var(--teal-50);
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.09);
 }
 
-/* ─── Dropdown ────────────────────────────────────────────── */
+/* ─── Dropdown ────────────────────────────────────────────────── */
 .navbar__dropdown-wrapper {
   position: relative;
 }
@@ -116,15 +123,30 @@
   color: var(--teal-700);
 }
 
-/* ─── Actions ─────────────────────────────────────────────── */
+/* ─── Actions ─────────────────────────────────────────────────── */
 .navbar__actions {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   flex-shrink: 0;
 }
+.navbar__actions .btn--primary {
+  background: var(--teal-700);
+  border-color: var(--teal-700);
+  box-shadow: 0 2px 14px rgba(155, 45, 31, 0.35);
+  transition:
+    background var(--transition),
+    box-shadow var(--transition),
+    transform var(--transition);
+}
+.navbar__actions .btn--primary:hover {
+  background: var(--teal-800);
+  border-color: var(--teal-800);
+  box-shadow: 0 4px 20px rgba(155, 45, 31, 0.45);
+  transform: translateY(-1px);
+}
 
-/* ─── Hamburger ───────────────────────────────────────────── */
+/* ─── Hamburger ───────────────────────────────────────────────── */
 .navbar__hamburger {
   display: none;
   flex-direction: column;
@@ -136,18 +158,27 @@
   border-radius: var(--radius-md);
   flex-shrink: 0;
   margin-left: auto;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.navbar__hamburger:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 .navbar__hamburger span {
   display: block;
   height: 2px;
-  background: var(--gray-500);
+  background: var(--white);
   border-radius: var(--radius-full);
   transform-origin: center;
   transition:
-    transform 0.25s ease,
+    transform 0.28s ease,
     opacity 0.2s ease;
   width: 100%;
 }
+
+/* ── X icon when open ── */
 .navbar__hamburger.open span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -159,18 +190,18 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ─── Mobile Menu ─────────────────────────────────────────── */
+/* ─── Mobile Menu ─────────────────────────────────────────────── */
 .navbar__mobile {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--white);
+  background: var(--navy-800);
   z-index: 199;
   overflow-y: auto;
   transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
   padding-top: calc(var(--nav-height) + 48px);
 }
 .navbar__mobile.open {
@@ -180,47 +211,83 @@
 .navbar__mobile-nav {
   display: flex;
   flex-direction: column;
-  padding: 0 var(--space-6) var(--space-8);
+  padding: 0 var(--space-6) var(--space-10);
 }
+
+/* Top-level mobile links */
 .navbar__mobile-link {
   display: block;
-  padding: 14px 0;
+  padding: 15px 0;
   font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--color-text);
-  border-bottom: 0.5px solid var(--color-border);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-decoration: none;
-  transition: color var(--transition);
+  transition:
+    color var(--transition),
+    padding-left var(--transition);
 }
 .navbar__mobile-link:hover,
 .navbar__mobile-link.active {
-  color: var(--teal-700);
+  color: var(--teal-200);
+  padding-left: var(--space-3);
 }
+
+/* Child links — indented service items */
 .navbar__mobile-child {
   font-size: 0.875rem;
   font-weight: 400;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.5);
   padding: 10px 0 10px var(--space-4);
   border-bottom: none;
+  transition:
+    color var(--transition),
+    padding-left var(--transition);
 }
+.navbar__mobile-child:hover {
+  color: rgba(255, 255, 255, 0.85);
+  padding-left: calc(var(--space-4) + var(--space-2));
+}
+
+/* Group (Services section) */
 .navbar__mobile-group {
-  border-bottom: 0.5px solid var(--color-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: var(--space-2);
 }
 .navbar__mobile-group-label {
   display: block;
-  padding: 14px 0 8px;
+  padding: 15px 0 8px;
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--teal-700);
+  color: var(--teal-100);
 }
+
+/* CTA buttons at bottom of mobile menu */
 .navbar__mobile-cta {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin-top: var(--space-8);
 }
+.navbar__mobile-cta .btn--primary {
+  background: var(--teal-700);
+  border-color: var(--teal-700);
+  box-shadow: 0 4px 20px rgba(155, 45, 31, 0.35);
+  width: 100%;
+  justify-content: center;
+}
+.navbar__mobile-cta .btn--outline {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--white);
+  width: 100%;
+  justify-content: center;
+}
+.navbar__mobile-cta .btn--outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+}
 
-/* ─── Mega Dropdown (Shop & Services) ────────────────────── */
+/* ─── Mega Dropdown (Shop & Services) ────────────────────────── */
 .navbar__mega {
   position: absolute;
   top: calc(100% + 12px);
@@ -229,20 +296,20 @@
   background: var(--white);
   border: 0.5px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
   z-index: 300;
   animation: dropIn 0.18s ease;
 }
-
-/* Services mega is wider to fit all service names */
 .navbar__mega--services {
   width: 560px;
 }
 
-/* ─── Mega Image Panel ────────────────────────────────────── */
+/* ─── Mega Image Panel ────────────────────────────────────────── */
 .navbar__mega-img {
   position: relative;
   overflow: hidden;
@@ -265,7 +332,7 @@
   left: 0;
   right: 0;
   padding: var(--space-5);
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, transparent 100%);
 }
 .navbar__mega-img-overlay p {
   font-size: 0.78rem;
@@ -277,7 +344,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #25d366;
+  background: var(--teal-700);
   color: var(--white);
   padding: 7px 14px;
   border-radius: var(--radius-md);
@@ -288,10 +355,10 @@
   transition: background var(--transition);
 }
 .navbar__mega-wa:hover {
-  background: #1ebd5a;
+  background: var(--teal-800);
 }
 
-/* ─── Mega Links Panel ────────────────────────────────────── */
+/* ─── Mega Links Panel ────────────────────────────────────────── */
 .navbar__mega-links {
   padding: var(--space-4) 0;
   background: var(--off-white);
@@ -321,8 +388,6 @@
   color: var(--teal-700);
   padding-left: calc(var(--space-5) + 6px);
 }
-
-/* All Services link — bold teal */
 .navbar__mega-link--all {
   font-weight: 700;
   color: var(--teal-700) !important;
@@ -332,8 +397,6 @@
   background: var(--teal-50);
   color: var(--teal-800) !important;
 }
-
-/* Divider between All Services and individual services */
 .navbar__mega-divider {
   height: 0.5px;
   background: var(--color-border);
@@ -341,7 +404,7 @@
   flex-shrink: 0;
 }
 
-/* ─── Responsive ──────────────────────────────────────────── */
+/* ─── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .navbar__nav,
   .navbar__actions {
@@ -350,4 +413,27 @@
   .navbar__hamburger {
     display: flex;
   }
+}
+
+/* ─── Mobile explicit close button ──────────────────────────── */
+.navbar__mobile-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+  z-index: 10;
+}
+.navbar__mobile-close:hover {
+  background: rgba(255, 255, 255, 0.18);
 }

@@ -82,68 +82,23 @@ export default function ShopPage() {
 
   return (
     <>
-      {/* ── Animated Shop Hero ── */}
-      <div className="shop-hero">
-        <div className="shop-hero__bg" aria-hidden="true" />
-        <div className="shop-hero__grid" aria-hidden="true" />
-        <div className="shop-hero__orb shop-hero__orb--1" aria-hidden="true" />
-        <div className="shop-hero__orb shop-hero__orb--2" aria-hidden="true" />
-
-        {/* Floating glasses around the hero */}
-        <div
-          className="shop-hero__glasses shop-hero__glasses--1"
-          aria-hidden="true"
-        >
-          <GlassesFrameSVG color="#9FE1CB" />
+      {/* ── Photo Hero ── */}
+      <div className="page-hero shop-page-hero">
+        <div className="page-hero__photo" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1508296695146-257a814070b4?w=1600&q=85"
+            alt=""
+          />
         </div>
-        <div
-          className="shop-hero__glasses shop-hero__glasses--2"
-          aria-hidden="true"
-        >
-          <SunglassesSVG color="#C9A84C" />
-        </div>
-        <div
-          className="shop-hero__glasses shop-hero__glasses--3"
-          aria-hidden="true"
-        >
-          <GlassesRoundSVG color="#9FE1CB" />
-        </div>
-        <div
-          className="shop-hero__glasses shop-hero__glasses--4"
-          aria-hidden="true"
-        >
-          <GlassesFrameSVG color="rgba(255,255,255,0.3)" />
-        </div>
-        <div
-          className="shop-hero__glasses shop-hero__glasses--5"
-          aria-hidden="true"
-        >
-          <ContactLensSVG color="#9FE1CB" />
-        </div>
-        <div
-          className="shop-hero__glasses shop-hero__glasses--6"
-          aria-hidden="true"
-        >
-          <SunglassesSVG color="rgba(255,255,255,0.25)" />
-        </div>
-
-        {/* Centre ring */}
-        <div
-          className="shop-hero__ring shop-hero__ring--1"
-          aria-hidden="true"
-        />
-        <div
-          className="shop-hero__ring shop-hero__ring--2"
-          aria-hidden="true"
-        />
-
-        <div className="container shop-hero__inner">
-          <span className="shop-hero__eyebrow">
-            <span className="shop-hero__pulse" /> Affordable eyewear for every
-            family
+        <div className="page-hero__overlay" aria-hidden="true" />
+        <div className="page-hero__content">
+          <span className="page-hero__badge">
+            ✦ Affordable eyewear for every family
           </span>
-          <h1 className="shop-hero__title">Shop Eyewear</h1>
-          <p className="shop-hero__subtitle">
+          <h1>
+            Shop <span>Eyewear</span>
+          </h1>
+          <p>
             Designer frames, contact lenses, and sunglasses — for every member
             of the family. 25% off your first contacts order.
           </p>

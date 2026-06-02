@@ -8,16 +8,31 @@
   user-select: none;
   box-shadow: var(--shadow-xl);
 }
-.ba-slider--dragging { cursor: grabbing; }
+.ba-slider--dragging {
+  cursor: grabbing;
+}
 
-/* Shared image styles */
-.ba-slider__after,
+/* After = condition side, full width underneath */
+.ba-slider__after {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ba-slider__after img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+}
+
+/* Before = normal vision, clipped via clipPath in JSX */
 .ba-slider__before {
   position: absolute;
   inset: 0;
   overflow: hidden;
 }
-.ba-slider__after img,
 .ba-slider__before img {
   width: 100%;
   height: 100%;
@@ -27,19 +42,7 @@
   pointer-events: none;
 }
 
-/* After = blurry (right side, full width, underneath) */
-.ba-slider__after { width: 100%; }
-.ba-slider__after img { filter: blur(6px) brightness(0.85); transform: scale(1.05); }
-
-/* Before = sharp (left side, clipped) */
-.ba-slider__before {
-  width: 50%;
-  overflow: hidden;
-  transition: width 0s;
-}
-.ba-slider__before img { width: 100%; min-width: 100vw; max-width: none; }
-
-/* Labels */
+/* Labels — nowrap so NORMAL VISION never wraps */
 .ba-slider__label {
   position: absolute;
   bottom: var(--space-5);
@@ -52,22 +55,25 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
 }
 .ba-slider__label--before {
   left: var(--space-5);
-  background: rgba(15,110,86,0.85);
+  background: rgba(15, 110, 86, 0.85);
   color: var(--white);
 }
 .ba-slider__label--after {
   right: var(--space-5);
-  background: rgba(0,0,0,0.55);
-  color: rgba(255,255,255,0.85);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* Divider */
 .ba-slider__divider {
   position: absolute;
-  top: 0; bottom: 0;
+  top: 0;
+  bottom: 0;
   transform: translateX(-50%);
   z-index: 10;
   display: flex;
@@ -79,32 +85,46 @@
   width: 2px;
   flex: 1;
   background: var(--white);
-  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
 .ba-slider__handle {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px; height: 48px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--white);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
   cursor: col-resize;
   pointer-events: all;
   color: var(--teal-700);
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 .ba-slider__handle:hover {
   transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* Mobile */
 @media (max-width: 768px) {
-  .ba-slider { aspect-ratio: 4 / 3; border-radius: var(--radius-lg); }
-  .ba-slider__handle { width: 40px; height: 40px; }
+  .ba-slider {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+  }
+  .ba-slider__handle {
+    width: 40px;
+    height: 40px;
+  }
+}
+@media (max-width: 480px) {
+  .ba-slider {
+    aspect-ratio: 1 / 1;
+  }
 }

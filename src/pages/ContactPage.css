@@ -3,28 +3,46 @@
 ═══════════════════════════════════════════════════════════════ */
 .contact-hero {
   position: relative;
-  min-height: 400px;
+  min-height: 340px;
   display: flex;
   align-items: center;
   overflow: hidden;
   padding-block: var(--space-16);
 }
+/* Photo background */
+.contact-hero__photo-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.contact-hero__photo-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.contact-hero__photo-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(6, 13, 31, 0.88) 0%,
+    rgba(13, 27, 62, 0.72) 50%,
+    rgba(91, 26, 22, 0.6) 100%
+  );
+}
 .contact-hero__bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    #021a30 0%,
-    #042c53 40%,
-    #085041 75%,
-    #0f6e56 100%
-  );
-  background-size: 300% 300%;
-  animation: gradientShift 12s ease infinite;
+  z-index: 0;
+  opacity: 0;
 }
 .contact-hero__grid {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
@@ -88,7 +106,7 @@
 
 .contact-hero__inner {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -661,4 +679,17 @@
   .contact-scene {
     display: none;
   }
+}
+
+/* ─── Form validation styles ─────────────────────────────────── */
+.input--error {
+  border-color: var(--teal-700) !important;
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.12) !important;
+}
+.field-error {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--teal-700);
+  font-weight: 600;
+  margin-top: 3px;
 }

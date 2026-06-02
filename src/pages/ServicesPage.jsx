@@ -26,12 +26,25 @@ export default function ServicesPage() {
 
   return (
     <>
+      {/* ── Photo Hero ── */}
       <div className="page-hero">
-        <h1>Our Services</h1>
-        <p>
-          Comprehensive eye care for every member of your family, at every stage
-          of life.
-        </p>
+        <div className="page-hero__photo" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1516069677018-378515003435?w=1600&q=85"
+            alt=""
+          />
+        </div>
+        <div className="page-hero__overlay" aria-hidden="true" />
+        <div className="page-hero__content">
+          <span className="page-hero__badge">✦ Expert eye care</span>
+          <h1>
+            Our <span>Services</span>
+          </h1>
+          <p>
+            Comprehensive eye care for every member of your family, at every
+            stage of life.
+          </p>
+        </div>
       </div>
 
       {/* Quick nav pills */}
@@ -47,7 +60,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Photo grid — with floating glasses deco */}
+      {/* Photo grid */}
       <section
         className="section section--alt svc-deco-section"
         style={{ paddingTop: 0 }}
@@ -82,7 +95,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Tech feature — with floating contact lens deco */}
+      {/* Tech section */}
       <section className="section svc-deco-section">
         <div className="svc-deco svc-deco--contact-1" aria-hidden="true">
           <ContactLensSVG color="#0F6E56" opacity="0.07" />
@@ -185,11 +198,9 @@ export default function ServicesPage() {
   );
 }
 
-/* ─── ServiceDetail ─────────────────────────────────────────── */
 function ServiceDetail({ s, i, photo, onBook }) {
   const photoRef = useScrollReveal({ threshold: 0.1 });
   const textRef = useScrollReveal({ threshold: 0.1 });
-
   return (
     <section
       id={s.id}
@@ -198,13 +209,9 @@ function ServiceDetail({ s, i, photo, onBook }) {
         (i % 2 !== 0 ? " section--alt" : "")
       }
     >
-      {/* Alternating decorative elements per section */}
       {i % 3 === 0 && (
         <div className="svc-deco svc-deco--glasses-alt-1" aria-hidden="true">
-          <GlassesFrameSVG
-            color={i % 2 !== 0 ? "#0F6E56" : "#0F6E56"}
-            opacity="0.06"
-          />
+          <GlassesFrameSVG color="#0F6E56" opacity="0.06" />
         </div>
       )}
       {i % 3 === 1 && (
@@ -217,7 +224,6 @@ function ServiceDetail({ s, i, photo, onBook }) {
           <EyeRingSVG color="#0F6E56" opacity="0.06" />
         </div>
       )}
-
       {i % 2 === 0 && <div className="svc-detail__deco" aria-hidden="true" />}
       <div className="container svc-detail__grid">
         <div className="svc-detail__photo reveal reveal--left" ref={photoRef}>
@@ -257,7 +263,6 @@ function ServiceDetail({ s, i, photo, onBook }) {
   );
 }
 
-/* ─── Decorative SVGs ───────────────────────────────────────── */
 function GlassesFrameSVG({ color = "#0F6E56", opacity = 0.08 }) {
   return (
     <svg
@@ -316,7 +321,6 @@ function GlassesFrameSVG({ color = "#0F6E56", opacity = 0.08 }) {
     </svg>
   );
 }
-
 function SunglassesSVG({ color = "#0F6E56", opacity = 0.06 }) {
   return (
     <svg
@@ -377,7 +381,6 @@ function SunglassesSVG({ color = "#0F6E56", opacity = 0.06 }) {
     </svg>
   );
 }
-
 function GlassesRoundSVG({ color = "#0F6E56", opacity = 0.06 }) {
   return (
     <svg
@@ -432,7 +435,6 @@ function GlassesRoundSVG({ color = "#0F6E56", opacity = 0.06 }) {
     </svg>
   );
 }
-
 function ContactLensSVG({ color = "#0F6E56", opacity = 0.07 }) {
   return (
     <svg
@@ -462,7 +464,6 @@ function ContactLensSVG({ color = "#0F6E56", opacity = 0.07 }) {
     </svg>
   );
 }
-
 function EyeRingSVG({ color = "#0F6E56", opacity = 0.06 }) {
   return (
     <svg
@@ -498,7 +499,6 @@ function EyeRingSVG({ color = "#0F6E56", opacity = 0.06 }) {
     </svg>
   );
 }
-
 const CheckIcon = () => (
   <svg
     width="15"

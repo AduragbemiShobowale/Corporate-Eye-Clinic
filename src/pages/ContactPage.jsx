@@ -12,13 +12,74 @@ export default function ContactPage() {
     date: "",
     message: "",
   });
+  const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const formRef = useScrollReveal({ threshold: 0.05 });
   const sidebarRef = useScrollReveal({ threshold: 0.05 });
 
-  const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handle = (e) => {
+    const { name, value } = e.target;
+    // Phone: only allow digits, spaces, +, -
+    if (name === "phone") {
+      if (!/^[0-9\s+\-()]*$/.test(value)) return;
+    }
+    setForm({ ...form, [name]: value });
+    // Clear error on change
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = "Full name is required";
+    if (!form.email.trim()) e.email = "Email address is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      e.email = "Enter a valid email address";
+    if (form.phone && form.phone.replace(/[\s+\-()]/g, "").length < 7)
+      e.phone = "Enter a valid phone number";
+    if (!form.service) e.service = "Please select a service";
+    if (!form.message.trim())
+      e.message = "Please tell us more about your needs";
+    return e;
+  };
+
   const submit = (e) => {
     e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+
+    // Build WhatsApp message
+    const serviceLabels = {
+      "eye-exam": "Comprehensive Eye Examination",
+      glaucoma: "Glaucoma Management",
+      contacts: "Contact Lens Practice",
+      "low-vision": "Low Vision Rehabilitation",
+      pediatric: "Pediatric Eye Care",
+      industrial: "Industrial & Pre-Employment Screening",
+      general: "General eye exam",
+      other: "Other / Not sure",
+    };
+    const msg = [
+      "👁️ *New Appointment Request*",
+      "",
+      `*Name:* ${form.name}`,
+      `*Email:* ${form.email}`,
+      form.phone ? `*Phone:* ${form.phone}` : null,
+      form.service
+        ? `*Service:* ${serviceLabels[form.service] || form.service}`
+        : null,
+      form.date ? `*Preferred date:* ${form.date}` : null,
+      form.message ? `*Notes:* ${form.message}` : null,
+      "",
+      "_Sent via Corporate Eye Clinic website_",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const url = `https://wa.me/2349068549539?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
     setSubmitted(true);
   };
 
@@ -26,34 +87,15 @@ export default function ContactPage() {
     <>
       {/* ── Hero ── */}
       <div className="contact-hero">
-        <div className="contact-hero__bg" aria-hidden="true" />
+        {/* Photo background */}
+        <div className="contact-hero__photo-bg" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=1600&q=85"
+            alt=""
+          />
+        </div>
+        <div className="contact-hero__photo-overlay" aria-hidden="true" />
         <div className="contact-hero__grid" aria-hidden="true" />
-        <div
-          className="contact-hero__orb contact-hero__orb--1"
-          aria-hidden="true"
-        />
-        <div
-          className="contact-hero__orb contact-hero__orb--2"
-          aria-hidden="true"
-        />
-        <div
-          className="contact-hero__deco contact-hero__deco--1"
-          aria-hidden="true"
-        >
-          <EyeLineSVG />
-        </div>
-        <div
-          className="contact-hero__deco contact-hero__deco--2"
-          aria-hidden="true"
-        >
-          <RingSVG />
-        </div>
-        <div
-          className="contact-hero__deco contact-hero__deco--3"
-          aria-hidden="true"
-        >
-          <EyeLineSVG />
-        </div>
 
         <div className="container contact-hero__inner">
           <span className="contact-hero__eyebrow">
@@ -133,10 +175,11 @@ export default function ContactPage() {
                 <div className="contact__success-icon">
                   <CheckCircleIcon />
                 </div>
-                <h3>Booking received!</h3>
+                <h3>Almost there! 🎉</h3>
                 <p>
-                  Thank you, <strong>{form.name}</strong>. We'll be in touch
-                  shortly to confirm your appointment.
+                  A WhatsApp message has been pre-filled with your details. Just
+                  tap <strong>Send</strong> in WhatsApp to confirm — the clinic
+                  will reply shortly.
                 </p>
                 <button
                   className="btn btn--primary"
@@ -167,8 +210,12 @@ export default function ContactPage() {
                       value={form.name}
                       onChange={handle}
                       placeholder="Your full name"
-                      required
+                      aria-invalid={!!errors.name}
+                      className={errors.name ? "input--error" : ""}
                     />
+                    {errors.name && (
+                      <span className="field-error">{errors.name}</span>
+                    )}
                   </div>
                   <div className="contact__field">
                     <label htmlFor="email">Email address *</label>
@@ -179,8 +226,12 @@ export default function ContactPage() {
                       value={form.email}
                       onChange={handle}
                       placeholder="you@example.com"
-                      required
+                      aria-invalid={!!errors.email}
+                      className={errors.email ? "input--error" : ""}
                     />
+                    {errors.email && (
+                      <span className="field-error">{errors.email}</span>
+                    )}
                   </div>
                 </div>
                 <div className="contact__form-row">
@@ -193,7 +244,13 @@ export default function ContactPage() {
                       value={form.phone}
                       onChange={handle}
                       placeholder="+234 ..."
+                      inputMode="numeric"
+                      aria-invalid={!!errors.phone}
+                      className={errors.phone ? "input--error" : ""}
                     />
+                    {errors.phone && (
+                      <span className="field-error">{errors.phone}</span>
+                    )}
                   </div>
                   <div className="contact__field">
                     <label htmlFor="date">Preferred date</label>
@@ -208,13 +265,16 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="contact__field">
-                  <label htmlFor="service">Service needed</label>
-                  <div className="contact__select-wrap">
+                  <label htmlFor="service">Service needed *</label>
+                  <div
+                    className={`contact__select-wrap${errors.service ? " input--error" : ""}`}
+                  >
                     <select
                       id="service"
                       name="service"
                       value={form.service}
                       onChange={handle}
+                      aria-invalid={!!errors.service}
                     >
                       <option value="">Select a service</option>
                       {services.map((s) => (
@@ -227,9 +287,12 @@ export default function ContactPage() {
                     </select>
                     <ChevronIcon />
                   </div>
+                  {errors.service && (
+                    <span className="field-error">{errors.service}</span>
+                  )}
                 </div>
                 <div className="contact__field">
-                  <label htmlFor="message">Additional notes</label>
+                  <label htmlFor="message">Additional notes *</label>
                   <textarea
                     id="message"
                     name="message"
@@ -237,7 +300,12 @@ export default function ContactPage() {
                     onChange={handle}
                     rows={4}
                     placeholder="Tell us more about your symptoms or any questions you have…"
+                    aria-invalid={!!errors.message}
+                    className={errors.message ? "input--error" : ""}
                   />
+                  {errors.message && (
+                    <span className="field-error">{errors.message}</span>
+                  )}
                 </div>
                 <button
                   type="submit"

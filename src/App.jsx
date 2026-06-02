@@ -1,13 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Navbar from './components/layout/Navbar'
-import Footer from './components/layout/Footer'
-import ScrollToTop from './components/layout/ScrollToTop'
-import WhatsAppFloat from './components/ui/WhatsAppFloat'
-import HomePage from './pages/HomePage'
-import ServicesPage from './pages/ServicesPage'
-import AboutPage from './pages/AboutPage'
-import ContactPage from './pages/ContactPage'
-import ShopPage from './pages/ShopPage'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
+import WhatsAppFloat from "./components/ui/WhatsAppFloat";
+import HomePage from "./pages/HomePage";
+import ServicesPage from "./pages/ServicesPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import ShopPage from "./pages/ShopPage";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 export default function App() {
   return (
@@ -28,5 +28,5 @@ export default function App() {
         <WhatsAppFloat />
       </div>
     </Router>
-  )
+  );
 }

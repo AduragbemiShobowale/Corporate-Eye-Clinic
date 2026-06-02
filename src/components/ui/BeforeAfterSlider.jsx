@@ -29,6 +29,7 @@ export default function BeforeAfterSlider({
 
   const onTouchMove = useCallback(
     (e) => {
+      e.preventDefault();
       setPos(getPos(e.touches[0].clientX));
     },
     [getPos],
@@ -60,15 +61,18 @@ export default function BeforeAfterSlider({
         </span>
       </div>
 
-      {/* BEFORE — normal vision, clipped to left */}
-      <div className="ba-slider__before" style={{ width: `${pos}%` }}>
+      {/* BEFORE — normal vision, clipped via clipPath so image stays full size */}
+      <div
+        className="ba-slider__before"
+        style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+      >
         <img src={beforeSrc} alt={beforeLabel} draggable="false" />
         <span className="ba-slider__label ba-slider__label--before">
           {beforeLabel}
         </span>
       </div>
 
-      {/* Divider */}
+      {/* Divider handle */}
       <div className="ba-slider__divider" style={{ left: `${pos}%` }}>
         <div className="ba-slider__line" />
         <button
