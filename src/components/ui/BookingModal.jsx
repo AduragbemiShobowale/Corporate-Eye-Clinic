@@ -54,7 +54,6 @@ export default function BookingModal({ onClose }) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  // lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -62,23 +61,19 @@ export default function BookingModal({ onClose }) {
     };
   }, []);
 
-  // close on Escape
   useEffect(() => {
-    const handler = (e) => {
+    const h = (e) => {
       if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [onClose]);
 
   const set = (k) => (e) => {
     let value = e.target.value;
-    // Phone: only digits, spaces, + - ()
-    if (k === "phone") {
-      if (!/^[0-9\s+\-()]*$/.test(value)) return;
-    }
+    if (k === "phone" && !/^[0-9\s+\-()]*$/.test(value)) return;
     setForm((f) => ({ ...f, [k]: value }));
-    if (errors[k]) setErrors((prev) => ({ ...prev, [k]: "" }));
+    if (errors[k]) setErrors((p) => ({ ...p, [k]: "" }));
   };
 
   const validate = () => {
@@ -103,7 +98,6 @@ export default function BookingModal({ onClose }) {
       return;
     }
 
-    // Build WhatsApp message
     const serviceName =
       services.find((s) => s.id === form.service)?.title ||
       form.service ||
@@ -123,8 +117,10 @@ export default function BookingModal({ onClose }) {
       .filter(Boolean)
       .join("\n");
 
-    const url = `https://wa.me/234908549539?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
+    window.open(
+      `https://wa.me/2348033372738?text=${encodeURIComponent(msg)}`,
+      "_blank",
+    );
     setSubmitted(true);
   };
 
@@ -133,13 +129,8 @@ export default function BookingModal({ onClose }) {
       className="bm-overlay"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        className="bm-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Book an appointment"
-      >
-        {/* Left photo panel */}
+      <div className="bm-modal" role="dialog" aria-modal="true">
+        {/* ── Left photo panel ── */}
         <div className="bm-photo">
           <img
             src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&q=80"
@@ -153,18 +144,17 @@ export default function BookingModal({ onClose }) {
           </div>
         </div>
 
-        {/* Right form panel */}
+        {/* ── Right form panel ── */}
         <div className="bm-form-wrap">
           <button className="bm-close" onClick={onClose} aria-label="Close">
             <svg
-              width="20"
-              height="20"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
-              strokeLinejoin="round"
             >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -204,6 +194,7 @@ export default function BookingModal({ onClose }) {
               <h2 className="bm-title">Schedule an Appointment</h2>
 
               <form className="bm-form" onSubmit={submit} noValidate>
+                {/* Service + Doctor */}
                 <div className="bm-row">
                   <div className="bm-field">
                     <label>SERVICE *</label>
@@ -246,6 +237,7 @@ export default function BookingModal({ onClose }) {
                   </div>
                 </div>
 
+                {/* Name + Phone */}
                 <div className="bm-row">
                   <div className="bm-field">
                     <label>YOUR NAME *</label>
@@ -276,7 +268,7 @@ export default function BookingModal({ onClose }) {
                   </div>
                 </div>
 
-                {/* ── Date row ── */}
+                {/* Date — own row */}
                 <div className="bm-field">
                   <label>DATE</label>
                   <div className="bm-date-row">
@@ -312,13 +304,13 @@ export default function BookingModal({ onClose }) {
                   )}
                 </div>
 
-                {/* ── Time row — separate and clean ── */}
+                {/* Time — own row below date */}
                 <div className="bm-field">
                   <label>TIME *</label>
                   <div className="bm-date-row">
                     <div
                       className={`bm-select-wrap${errors.hour ? " bm-select-wrap--error" : ""}`}
-                      style={{ flex: 2 }}
+                      style={{ flex: 3 }}
                     >
                       <select value={form.hour} onChange={set("hour")}>
                         <option value="">Select time</option>

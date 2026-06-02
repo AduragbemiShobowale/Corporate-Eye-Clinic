@@ -1,146 +1,334 @@
-.ba-slider {
+/* ─── Overlay ─────────────────────────────────────────────────── */
+.bm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 13, 31, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ─── Modal shell ─────────────────────────────────────────────── */
+.bm-modal {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 7;
+  max-width: 760px;
+  max-height: 88vh;
+  background: var(--white);
+  border-radius: 20px;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  cursor: col-resize;
-  user-select: none;
-  box-shadow: var(--shadow-xl);
-}
-.ba-slider--dragging {
-  cursor: grabbing;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: row;
 }
 
-/* After = condition side, full width underneath */
-.ba-slider__after {
-  position: absolute;
-  inset: 0;
+/* ─── Left photo panel ────────────────────────────────────────── */
+.bm-photo {
+  position: relative;
+  width: 280px;
+  flex-shrink: 0;
   overflow: hidden;
 }
-.ba-slider__after img {
+.bm-photo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center top;
   display: block;
-  pointer-events: none;
 }
-
-/* Before = normal vision, clipped via clipPath in JSX */
-.ba-slider__before {
+.bm-photo__overlay {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-.ba-slider__before img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  pointer-events: none;
-}
-
-/* Label wrappers — each clips in sync with its panel */
-.ba-slider__label-wrap {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 11;
-}
-
-/* Labels — outside clipped panels, never get cut off */
-.ba-slider__label {
-  position: absolute;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  pointer-events: none;
-  z-index: 11;
-  white-space: nowrap;
-  max-width: 45%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Before label — top left */
-.ba-slider__label--before {
-  top: var(--space-4);
-  left: var(--space-4);
-  background: rgba(15, 110, 86, 0.88);
-  color: var(--white);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-/* After label — top right */
-.ba-slider__label--after {
-  top: var(--space-4);
-  right: var(--space-4);
-  background: rgba(0, 0, 0, 0.6);
-  color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-/* Divider */
-.ba-slider__divider {
-  position: absolute;
-  top: 0;
   bottom: 0;
-  transform: translateX(-50%);
-  z-index: 10;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  background: linear-gradient(
+    to top,
+    rgba(4, 44, 32, 0.9) 0%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+.bm-photo__quote {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.bm-photo__attr {
+  font-size: 0.7rem;
+  color: #9fe1cb;
+  font-weight: 600;
+}
+
+/* ─── Right form panel ────────────────────────────────────────── */
+.bm-form-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  pointer-events: none;
+  padding: 32px 32px 28px 32px;
+  overflow-y: auto;
+  background: #faf8f5;
+  -webkit-overflow-scrolling: touch;
 }
-.ba-slider__line {
-  width: 2px;
-  flex: 1;
-  background: var(--white);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-}
-.ba-slider__handle {
+
+/* Close button */
+.bm-close {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--white);
+  background: rgba(0, 0, 0, 0.07);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
-  cursor: col-resize;
-  pointer-events: all;
-  color: var(--teal-700);
+  cursor: pointer;
+  color: #6b7280;
+  z-index: 2;
   transition:
-    transform var(--transition),
-    box-shadow var(--transition);
+    background 0.2s,
+    color 0.2s;
 }
-.ba-slider__handle:hover {
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+.bm-close:hover {
+  background: rgba(0, 0, 0, 0.13);
+  color: #111;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .ba-slider {
-    aspect-ratio: 4 / 3;
-    border-radius: var(--radius-lg);
+/* ─── Eyebrow + title ─────────────────────────────────────────── */
+.bm-eyebrow {
+  display: inline-block;
+  background: #fffbea;
+  color: #a07200;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(160, 114, 0, 0.25);
+  width: fit-content;
+}
+.bm-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 24px;
+  line-height: 1.25;
+  padding-right: 40px;
+}
+
+/* ─── Form ────────────────────────────────────────────────────── */
+.bm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.bm-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.bm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.bm-field label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Inputs */
+.bm-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: #fff;
+  color: #111;
+  outline: none;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+.bm-field input:focus {
+  border-color: var(--teal-600, #9b2d1f);
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.1);
+}
+.bm-field input::placeholder {
+  color: #9ca3af;
+}
+
+/* Select wrapper */
+.bm-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.bm-select-wrap select {
+  width: 100%;
+  padding: 10px 32px 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: #fff;
+  color: #111;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+.bm-select-wrap select:focus {
+  border-color: var(--teal-600, #9b2d1f);
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.1);
+}
+.bm-select-wrap svg {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: #9ca3af;
+}
+
+/* Date / time rows */
+.bm-date-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.bm-date-row .bm-select-wrap {
+  flex: 1;
+}
+.bm-date-row .bm-select-wrap select {
+  width: 100%;
+}
+
+/* Error states */
+.bm-input--error {
+  border-color: #9b2d1f !important;
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.12) !important;
+}
+.bm-select-wrap--error select {
+  border-color: #9b2d1f !important;
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.12) !important;
+}
+.bm-field-error {
+  font-size: 0.68rem;
+  color: #9b2d1f;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Submit button */
+.bm-submit {
+  width: 100%;
+  padding: 13px;
+  background: var(--teal-700, #9b2d1f);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  margin-top: 8px;
+  transition:
+    background 0.18s,
+    transform 0.15s,
+    box-shadow 0.18s;
+}
+.bm-submit:hover {
+  background: #7d2519;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(155, 45, 31, 0.35);
+}
+
+/* ─── Success state ───────────────────────────────────────────── */
+.bm-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  gap: 16px;
+  padding: 40px 16px;
+}
+.bm-success__icon {
+  width: 72px;
+  height: 72px;
+  background: #fdf0ee;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9b2d1f;
+}
+.bm-success h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.bm-success p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+/* ─── Mobile — slides up from bottom ─────────────────────────── */
+@media (max-width: 680px) {
+  .bm-overlay {
+    padding: 0;
+    align-items: flex-end;
   }
-  .ba-slider__handle {
-    width: 40px;
-    height: 40px;
+  .bm-modal {
+    flex-direction: column;
+    max-height: 96vh;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+  }
+  .bm-photo {
+    width: 100%;
+    height: 170px;
+    flex-shrink: 0;
+  }
+  .bm-form-wrap {
+    flex: 1;
+    padding: 24px 20px 32px;
+  }
+  .bm-title {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+  .bm-row {
+    grid-template-columns: 1fr;
   }
 }
-@media (max-width: 480px) {
-  .ba-slider {
-    aspect-ratio: 1 / 1;
+@media (max-width: 380px) {
+  .bm-photo {
+    height: 130px;
+  }
+  .bm-form-wrap {
+    padding: 20px 16px 28px;
   }
 }
