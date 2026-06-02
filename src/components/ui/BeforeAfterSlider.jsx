@@ -56,9 +56,6 @@ export default function BeforeAfterSlider({
           style={filterStyle}
           className={filterClass}
         />
-        <span className="ba-slider__label ba-slider__label--after">
-          {afterLabel}
-        </span>
       </div>
 
       {/* BEFORE — normal vision, clipped via clipPath so image stays full size */}
@@ -67,10 +64,15 @@ export default function BeforeAfterSlider({
         style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
       >
         <img src={beforeSrc} alt={beforeLabel} draggable="false" />
-        <span className="ba-slider__label ba-slider__label--before">
-          {beforeLabel}
-        </span>
       </div>
+
+      {/* Labels rendered OUTSIDE clipped panels so they never get cut off */}
+      <span className="ba-slider__label ba-slider__label--before">
+        {beforeLabel}
+      </span>
+      <span className="ba-slider__label ba-slider__label--after">
+        {afterLabel}
+      </span>
 
       {/* Divider handle */}
       <div className="ba-slider__divider" style={{ left: `${pos}%` }}>
