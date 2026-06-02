@@ -66,13 +66,27 @@ export default function BeforeAfterSlider({
         <img src={beforeSrc} alt={beforeLabel} draggable="false" />
       </div>
 
-      {/* Labels rendered OUTSIDE clipped panels so they never get cut off */}
-      <span className="ba-slider__label ba-slider__label--before">
-        {beforeLabel}
-      </span>
-      <span className="ba-slider__label ba-slider__label--after">
-        {afterLabel}
-      </span>
+      {/* Before label — clips away as you drag left, exactly at the divider */}
+      <div
+        className="ba-slider__label-wrap"
+        style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+        aria-hidden="true"
+      >
+        <span className="ba-slider__label ba-slider__label--before">
+          {beforeLabel}
+        </span>
+      </div>
+
+      {/* After label — clips away as you drag right, exactly at the divider */}
+      <div
+        className="ba-slider__label-wrap"
+        style={{ clipPath: `inset(0 0 0 ${pos}%)` }}
+        aria-hidden="true"
+      >
+        <span className="ba-slider__label ba-slider__label--after">
+          {afterLabel}
+        </span>
+      </div>
 
       {/* Divider handle */}
       <div className="ba-slider__divider" style={{ left: `${pos}%` }}>
