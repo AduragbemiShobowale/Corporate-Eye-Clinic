@@ -342,6 +342,21 @@ export default function Navbar() {
               >
                 Book an eye exam
               </button>
+              <button
+                className="btn btn--outline navbar__mobile-cart-btn"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setDrawer(true);
+                }}
+              >
+                <CartIcon />
+                View cart
+                {count > 0 && (
+                  <span className="navbar__cart-badge navbar__cart-badge--inline">
+                    {count}
+                  </span>
+                )}
+              </button>
               <a
                 href="https://wa.me/2348033372738"
                 className="btn btn--outline"

@@ -16,7 +16,6 @@ export function CartProvider({ children }) {
       }
       return [...prev, { product, qty: 1 }];
     });
-    setDrawer(true);
   }, []);
 
   const removeFromCart = useCallback((productId) => {

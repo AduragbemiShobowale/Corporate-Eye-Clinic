@@ -311,3 +311,24 @@
     padding: var(--space-4);
   }
 }
+
+/* ─── Mobile cart button in nav ───────────────────────────────── */
+.navbar__mobile-cart-btn {
+  width: 100%;
+  justify-content: center;
+  gap: var(--space-2);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--white);
+  position: relative;
+}
+.navbar__mobile-cart-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.navbar__cart-badge--inline {
+  position: static;
+  margin-left: 4px;
+  border: none;
+  background: var(--amber-400);
+  color: #000;
+}
