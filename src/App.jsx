@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import WhatsAppFloat from "./components/ui/WhatsAppFloat";
+import CartDrawer from "./components/ui/CartDrawer";
 import HomePage from "./pages/HomePage";
 import ServicesPage from "./pages/ServicesPage";
 import AboutPage from "./pages/AboutPage";
@@ -11,22 +13,25 @@ import ScrollToTop from "./components/layout/ScrollToTop";
 
 export default function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="app">
-        <Navbar />
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/shop" element={<ShopPage />} />
-          </Routes>
-        </main>
-        <Footer />
-        <WhatsAppFloat />
-      </div>
-    </Router>
+    <CartProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="app">
+          <Navbar />
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/shop" element={<ShopPage />} />
+            </Routes>
+          </main>
+          <Footer />
+          <WhatsAppFloat />
+          <CartDrawer />
+        </div>
+      </Router>
+    </CartProvider>
   );
 }

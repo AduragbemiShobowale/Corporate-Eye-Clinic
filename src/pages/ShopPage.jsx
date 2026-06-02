@@ -1,6 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { shopCategories } from "../data/siteData";
+import { useCart } from "../context/CartContext";
 import "./ShopPage.css";
+
+const fmt = (n) => "₦" + n.toLocaleString("en-NG");
 
 const products = [
   {
@@ -74,6 +77,7 @@ function formatNGN(n) {
 
 export default function ShopPage() {
   const [active, setActive] = useState("all");
+  const { addToCart, items } = useCart();
 
   const filtered =
     active === "all"
@@ -106,7 +110,7 @@ export default function ShopPage() {
       </div>
 
       {/* ── Promo bar ── */}
-      <div className="shop-promo">
+      {/* <div className="shop-promo">
         <div className="container shop-promo__inner">
           <span className="badge badge--amber">Limited offer</span>
           <span className="shop-promo__text">
@@ -114,7 +118,7 @@ export default function ShopPage() {
             <code>FIRSTLENS</code> at checkout.
           </span>
         </div>
-      </div>
+      </div> */}
 
       <section className="section">
         <div className="container">
@@ -151,9 +155,7 @@ export default function ShopPage() {
                     )}
                     <h3 className="shop__card-name">{p.name}</h3>
                     <p className="shop__card-price">{formatNGN(p.price)}</p>
-                    <button className="btn btn--primary shop__add-btn">
-                      Add to cart
-                    </button>
+                    <AddToCartBtn product={p} />
                   </div>
                 </div>
               ))}
@@ -180,7 +182,93 @@ export default function ShopPage() {
           </div>
         </div>
       </section>
+      {/* ── Floating cart bar ── */}
+      <FloatingCart />
     </>
+  );
+}
+
+function AddToCartBtn({ product }) {
+  const { addToCart, items } = useCart();
+  const [flash, setFlash] = React.useState(false);
+  const inCart = items.find((i) => i.product.id === product.id);
+
+  const handleAdd = () => {
+    addToCart(product);
+    setFlash(true);
+    setTimeout(() => setFlash(false), 600);
+  };
+
+  return (
+    <button
+      className={`btn btn--primary shop__add-btn${flash ? " shop__add-btn--flash" : ""}`}
+      onClick={handleAdd}
+    >
+      {inCart ? (
+        <>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          In cart ({inCart.qty})
+        </>
+      ) : (
+        <>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="9" cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+          </svg>
+          Add to cart
+        </>
+      )}
+    </button>
+  );
+}
+
+function FloatingCart() {
+  const { count, total, setDrawer } = useCart();
+  if (count === 0) return null;
+  return (
+    <div className="shop-cart-bar" onClick={() => setDrawer(true)}>
+      <div className="shop-cart-bar__left">
+        <span className="shop-cart-bar__badge">{count}</span>
+        <span className="shop-cart-bar__label">View cart</span>
+      </div>
+      <div className="shop-cart-bar__right">
+        <span className="shop-cart-bar__total">{fmt(total)}</span>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </div>
+    </div>
   );
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useCart } from "../../context/CartContext";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { navLinks, services } from "../../data/siteData";
 import BookingModal from "../ui/BookingModal";
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [activeDropdown, setActive] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
+  const { count, setDrawer } = useCart();
   const dropdownRef = useRef(null);
   const hoverTimeout = useRef(null);
 
@@ -229,6 +231,14 @@ export default function Navbar() {
 
           <div className="navbar__actions">
             <button
+              className="navbar__cart-btn"
+              onClick={() => setDrawer(true)}
+              aria-label="Open cart"
+            >
+              <CartIcon />
+              {count > 0 && <span className="navbar__cart-badge">{count}</span>}
+            </button>
+            <button
               className="btn btn--primary btn--sm"
               onClick={() => setShowModal(true)}
             >
@@ -380,6 +390,22 @@ const ChevronIcon = ({ rotated }) => (
     strokeLinejoin="round"
   >
     <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+const CartIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
   </svg>
 );
 const WaIcon = () => (

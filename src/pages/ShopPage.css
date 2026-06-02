@@ -395,3 +395,110 @@
   text-align: center;
   gap: var(--space-3);
 }
+
+/* ─── Floating cart bar ───────────────────────────────────────── */
+.shop-cart-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 350;
+  background: var(--navy-800);
+  color: var(--white);
+  border-radius: var(--radius-full);
+  padding: 14px 20px 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  min-width: 280px;
+  max-width: 420px;
+  width: calc(100% - var(--space-8));
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  animation: slideUpCart 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUpCart {
+  from {
+    transform: translateX(-50%) translateY(80px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+.shop-cart-bar:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.shop-cart-bar__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.shop-cart-bar__badge {
+  background: var(--teal-700);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.shop-cart-bar__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.shop-cart-bar__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.shop-cart-bar__total {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--amber-300);
+}
+
+/* ─── Add to cart button states ───────────────────────────────── */
+.shop__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition:
+    background var(--transition),
+    transform 0.15s ease,
+    box-shadow var(--transition);
+}
+.shop__add-btn--flash {
+  background: var(--teal-800) !important;
+  transform: scale(0.97);
+}
+
+/* ─── Padding so floating bar doesn't cover last product ─────── */
+.shop__grid {
+  padding-bottom: var(--space-4);
+}
+@media (max-width: 600px) {
+  .shop-cart-bar {
+    bottom: 16px;
+    min-width: unset;
+    width: calc(100% - 32px);
+  }
+}
