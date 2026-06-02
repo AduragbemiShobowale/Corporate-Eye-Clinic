@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import CheckoutModal from "./CheckoutModal";
 import "./CartDrawer.css";
@@ -50,12 +51,13 @@ export default function CartDrawer() {
                 <CartIcon />
               </div>
               <p>Your cart is empty</p>
-              <button
+              <Link
+                to="/shop"
                 className="btn btn--outline"
                 onClick={() => setDrawer(false)}
               >
                 Continue shopping
-              </button>
+              </Link>
             </div>
           ) : (
             <ul className="cart-drawer__items">
@@ -119,12 +121,13 @@ export default function CartDrawer() {
             >
               Checkout <ArrowIcon />
             </button>
-            <button
+            <Link
+              to="/shop"
               className="btn btn--outline cart-drawer__continue"
               onClick={() => setDrawer(false)}
             >
               Continue shopping
-            </button>
+            </Link>
           </div>
         )}
       </div>
