@@ -275,7 +275,7 @@ function WelcomeSection({ onBook }) {
             </div>
             <div className="welcome__photo welcome__photo--badge">
               <img
-                src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80"
+                src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780425302/download_ekzxzu.jpg"
                 alt="Optometry equipment"
               />
               <div className="welcome__photo-label">
@@ -413,7 +413,7 @@ function ConditionsSection({ onBook }) {
         <div className="conditions__aside reveal reveal--right" ref={rightRef}>
           <div className="conditions__aside-photo">
             <img
-              src="https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=500&q=80"
+              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780423158/1000_F_547386801_cirwq1I4QUZHPdoMTbgSky83Cy3YtqVq_iwbhal.jpg"
               alt="School eye health programme"
             />
           </div>

@@ -102,10 +102,10 @@ export default function ShopPage() {
           <h1>
             Shop <span>Eyewear</span>
           </h1>
-          <p>
+          {/* <p>
             Designer frames, contact lenses, and sunglasses — for every member
             of the family. 25% off your first contacts order.
-          </p>
+          </p> */}
         </div>
       </div>
 
