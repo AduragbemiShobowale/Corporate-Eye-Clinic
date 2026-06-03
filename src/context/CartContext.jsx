@@ -1,10 +1,40 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 
 const CartContext = createContext(null);
 
+const STORAGE_KEY = "cec_cart";
+
+// Load saved cart from localStorage on startup
+function loadCart() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Save cart to localStorage
+function saveCart(items) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
 export function CartProvider({ children }) {
-  const [items, setItems] = useState([]); // [{ product, qty }]
+  const [items, setItems] = useState(loadCart); // load from storage on mount
   const [drawerOpen, setDrawer] = useState(false);
+
+  // Persist to localStorage whenever items change
+  useEffect(() => {
+    saveCart(items);
+  }, [items]);
 
   const addToCart = useCallback((product) => {
     setItems((prev) => {
@@ -35,7 +65,10 @@ export function CartProvider({ children }) {
     [removeFromCart],
   );
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
 
   const total = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
   const count = items.reduce((sum, i) => sum + i.qty, 0);
