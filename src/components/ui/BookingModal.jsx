@@ -3,9 +3,8 @@ import { services } from "../../data/siteData";
 import { supabase } from "../../lib/supabase";
 import "./BookingModal.css";
 
-// ── Configurable limits ──────────────────────────────────────────
-const MAX_PER_SLOT = 2; // max bookings per time slot
-const MAX_PER_DAY = 30; // max bookings per day — change here to adjust
+const MAX_PER_SLOT = 2;
+const MAX_PER_DAY = 30;
 
 const DOCTORS = ["Dr. Onoja G."];
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -25,6 +24,7 @@ const MONTHS_ALL = [
 ];
 const THIS_YEAR = new Date().getFullYear();
 const THIS_MONTH = new Date().getMonth() + 1;
+const THIS_DAY = new Date().getDate();
 const YEARS = [THIS_YEAR, THIS_YEAR + 1, THIS_YEAR + 2];
 const HOURS = [
   "8:00",
@@ -61,12 +61,10 @@ export default function BookingModal({ onClose }) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  // slot availability
   const [dayFull, setDayFull] = useState(false);
-  const [slotCounts, setSlotCounts] = useState({}); // { "8:00 AM": 2, ... }
+  const [slotCounts, setSlotCounts] = useState({});
   const [checkingSlots, setChecking] = useState(false);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -74,7 +72,6 @@ export default function BookingModal({ onClose }) {
     };
   }, []);
 
-  // Close on Escape
   useEffect(() => {
     const h = (e) => {
       if (e.key === "Escape") onClose();
@@ -83,15 +80,13 @@ export default function BookingModal({ onClose }) {
     return () => window.removeEventListener("keydown", h);
   }, [onClose]);
 
-  // Fetch slot counts when date is fully selected
   useEffect(() => {
     if (!form.day || !form.month || !form.year) {
       setSlotCounts({});
       setDayFull(false);
       return;
     }
-    const dateStr = `${form.day} ${form.month} ${form.year}`;
-    fetchSlots(dateStr);
+    fetchSlots(`${form.day} ${form.month} ${form.year}`);
   }, [form.day, form.month, form.year]);
 
   const fetchSlots = async (dateStr) => {
@@ -101,10 +96,7 @@ export default function BookingModal({ onClose }) {
         .from("bookings")
         .select("time_slot")
         .eq("date", dateStr);
-
       if (error) throw error;
-
-      // Count per slot
       const counts = {};
       data.forEach((b) => {
         counts[b.time_slot] = (counts[b.time_slot] || 0) + 1;
@@ -130,17 +122,20 @@ export default function BookingModal({ onClose }) {
     if (!form.service) e.service = "Please select a service";
     if (!form.doctor) e.doctor = "Please select a doctor";
     if (!form.name.trim()) e.name = "Your name is required";
-    if (!form.phone.trim()) e.phone = "Phone number is required";
-    else if (form.phone.replace(/[\s+\-()]/g, "").length < 7)
-      e.phone = "Enter a valid phone number";
+    if (!form.phone.trim()) {
+      e.phone = "Phone number is required";
+    } else if (form.phone.replace(/[\s+\-()]/g, "").length < 11) {
+      e.phone = "Phone number must be at least 11 digits";
+    }
     if (!form.day || !form.month || !form.year)
       e.date = "Please select a complete date";
-    if (!form.hour) e.hour = "Please select a time";
     if (dayFull)
       e.date = "This day is fully booked — please choose another date";
+    if (!form.hour) e.hour = "Please select a time";
     const slotKey = `${form.hour} ${form.period}`;
-    if (form.hour && (slotCounts[slotKey] || 0) >= MAX_PER_SLOT)
-      e.hour = "This time slot is full — please choose another time";
+    if (form.hour && (slotCounts[slotKey] || 0) >= MAX_PER_SLOT) {
+      e.hour = "This time slot is full — please choose another";
+    }
     return e;
   };
 
@@ -151,7 +146,6 @@ export default function BookingModal({ onClose }) {
       setErrors(errs);
       return;
     }
-
     setLoading(true);
     try {
       const dateStr = `${form.day} ${form.month} ${form.year}`;
@@ -160,8 +154,6 @@ export default function BookingModal({ onClose }) {
         services.find((s) => s.id === form.service)?.title ||
         form.service ||
         "General eye exam";
-
-      // 1. Save to Supabase
       const booking = {
         name: form.name,
         phone: form.phone,
@@ -174,7 +166,6 @@ export default function BookingModal({ onClose }) {
       const { error } = await supabase.from("bookings").insert([booking]);
       if (error) throw error;
 
-      // 2. Trigger email notification via Edge Function
       await fetch(
         "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-booking-email",
         {
@@ -187,7 +178,6 @@ export default function BookingModal({ onClose }) {
           body: JSON.stringify(booking),
         },
       );
-
       setSubmitted(true);
     } catch (err) {
       console.error("Booking failed:", err);
@@ -199,17 +189,21 @@ export default function BookingModal({ onClose }) {
     }
   };
 
+  const bookedCount = Object.values(slotCounts).reduce((a, b) => a + b, 0);
+  const slotsLeft = MAX_PER_DAY - bookedCount;
+  const fillPct = (slotsLeft / MAX_PER_DAY) * 100;
+
   return (
     <div
       className="bm-overlay"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bm-modal" role="dialog" aria-modal="true">
-        {/* ── Left photo panel ── */}
+        {/* Left photo */}
         <div className="bm-photo">
           <img
             src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&q=80"
-            alt="Optometrist at Corporate Eye Clinic"
+            alt="Optometrist"
           />
           <div className="bm-photo__overlay">
             <p className="bm-photo__quote">
@@ -219,7 +213,7 @@ export default function BookingModal({ onClose }) {
           </div>
         </div>
 
-        {/* ── Right form panel ── */}
+        {/* Right form */}
         <div className="bm-form-wrap">
           <button className="bm-close" onClick={onClose} aria-label="Close">
             <svg
@@ -345,19 +339,28 @@ export default function BookingModal({ onClose }) {
 
                 {/* Date */}
                 <div className="bm-field">
-                  <label>
-                    DATE{" "}
-                    {dayFull && (
-                      <span className="bm-slot-full">— Day fully booked</span>
-                    )}
-                  </label>
+                  <label>DATE</label>
                   <div className="bm-date-row">
                     <div className="bm-select-wrap" style={{ flex: 1 }}>
                       <select value={form.day} onChange={set("day")}>
                         <option value="">Day</option>
-                        {DAYS.map((d) => (
-                          <option key={d}>{d}</option>
-                        ))}
+                        {DAYS.map((d) => {
+                          const isPast =
+                            Number(form.year) === THIS_YEAR &&
+                            MONTHS_ALL.indexOf(form.month) + 1 === THIS_MONTH &&
+                            d < THIS_DAY;
+                          return (
+                            <option
+                              key={d}
+                              value={d}
+                              disabled={isPast}
+                              style={isPast ? { color: "#ccc" } : {}}
+                            >
+                              {d}
+                              {isPast ? " (past)" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <ChevronIcon />
                     </div>
@@ -399,14 +402,45 @@ export default function BookingModal({ onClose }) {
                   )}
                 </div>
 
+                {/* Slots remaining bar */}
+                {form.day && form.month && form.year && (
+                  <div className="bm-slots-bar">
+                    {checkingSlots ? (
+                      <span className="bm-slots-bar__checking">
+                        Checking availability…
+                      </span>
+                    ) : dayFull ? (
+                      <div className="bm-slots-bar__full">
+                        <span className="bm-slots-bar__dot bm-slots-bar__dot--red" />
+                        This day is fully booked — please choose another date
+                      </div>
+                    ) : (
+                      <div className="bm-slots-bar__wrap">
+                        <div className="bm-slots-bar__info">
+                          <span className="bm-slots-bar__dot bm-slots-bar__dot--green" />
+                          <span>
+                            <strong>{slotsLeft}</strong> of{" "}
+                            <strong>{MAX_PER_DAY}</strong> slots available for{" "}
+                            {form.day} {form.month}
+                          </span>
+                        </div>
+                        <div className="bm-slots-bar__track">
+                          <div
+                            className="bm-slots-bar__fill"
+                            style={{ width: `${fillPct}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Time */}
                 <div className="bm-field">
                   <label>
                     TIME *{" "}
                     {checkingSlots && (
-                      <span className="bm-checking">
-                        Checking availability…
-                      </span>
+                      <span className="bm-checking">Checking…</span>
                     )}
                   </label>
                   <div className="bm-date-row">
@@ -422,8 +456,8 @@ export default function BookingModal({ onClose }) {
                         <option value="">Select time</option>
                         {HOURS.map((h) => {
                           const slotKey = `${h} ${form.period}`;
-                          const count = slotCounts[slotKey] || 0;
-                          const full = count >= MAX_PER_SLOT;
+                          const full =
+                            (slotCounts[slotKey] || 0) >= MAX_PER_SLOT;
                           return (
                             <option
                               key={h}
