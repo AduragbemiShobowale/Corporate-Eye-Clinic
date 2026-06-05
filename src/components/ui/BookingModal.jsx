@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { services } from "../../data/siteData";
+import { supabase } from "../../lib/supabase";
 import "./BookingModal.css";
+
+// ── Configurable limits ──────────────────────────────────────────
+const MAX_PER_SLOT = 2; // max bookings per time slot
+const MAX_PER_DAY = 30; // max bookings per day — change here to adjust
 
 const DOCTORS = ["Dr. Onoja G."];
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-const MONTHS = [
+const MONTHS_ALL = [
   "January",
   "February",
   "March",
@@ -18,7 +23,9 @@ const MONTHS = [
   "November",
   "December",
 ];
-const YEARS = [2025, 2026, 2027];
+const THIS_YEAR = new Date().getFullYear();
+const THIS_MONTH = new Date().getMonth() + 1;
+const YEARS = [THIS_YEAR, THIS_YEAR + 1, THIS_YEAR + 2];
 const HOURS = [
   "8:00",
   "8:30",
@@ -47,13 +54,19 @@ export default function BookingModal({ onClose }) {
     phone: "",
     day: "",
     month: "",
-    year: "",
+    year: String(THIS_YEAR),
     hour: "",
     period: "AM",
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  // slot availability
+  const [dayFull, setDayFull] = useState(false);
+  const [slotCounts, setSlotCounts] = useState({}); // { "8:00 AM": 2, ... }
+  const [checkingSlots, setChecking] = useState(false);
 
+  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -61,6 +74,7 @@ export default function BookingModal({ onClose }) {
     };
   }, []);
 
+  // Close on Escape
   useEffect(() => {
     const h = (e) => {
       if (e.key === "Escape") onClose();
@@ -68,6 +82,41 @@ export default function BookingModal({ onClose }) {
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [onClose]);
+
+  // Fetch slot counts when date is fully selected
+  useEffect(() => {
+    if (!form.day || !form.month || !form.year) {
+      setSlotCounts({});
+      setDayFull(false);
+      return;
+    }
+    const dateStr = `${form.day} ${form.month} ${form.year}`;
+    fetchSlots(dateStr);
+  }, [form.day, form.month, form.year]);
+
+  const fetchSlots = async (dateStr) => {
+    setChecking(true);
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("time_slot")
+        .eq("date", dateStr);
+
+      if (error) throw error;
+
+      // Count per slot
+      const counts = {};
+      data.forEach((b) => {
+        counts[b.time_slot] = (counts[b.time_slot] || 0) + 1;
+      });
+      setSlotCounts(counts);
+      setDayFull(data.length >= MAX_PER_DAY);
+    } catch (e) {
+      console.error("Slot check failed:", e);
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const set = (k) => (e) => {
     let value = e.target.value;
@@ -87,10 +136,15 @@ export default function BookingModal({ onClose }) {
     if (!form.day || !form.month || !form.year)
       e.date = "Please select a complete date";
     if (!form.hour) e.hour = "Please select a time";
+    if (dayFull)
+      e.date = "This day is fully booked — please choose another date";
+    const slotKey = `${form.hour} ${form.period}`;
+    if (form.hour && (slotCounts[slotKey] || 0) >= MAX_PER_SLOT)
+      e.hour = "This time slot is full — please choose another time";
     return e;
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) {
@@ -98,30 +152,56 @@ export default function BookingModal({ onClose }) {
       return;
     }
 
-    const serviceName =
-      services.find((s) => s.id === form.service)?.title ||
-      form.service ||
-      "General eye exam";
-    const msg = [
-      "👁️ *New Appointment Request*",
-      "",
-      `*Name:* ${form.name}`,
-      `*Phone:* ${form.phone}`,
-      `*Service:* ${serviceName}`,
-      form.doctor ? `*Doctor:* ${form.doctor}` : null,
-      `*Date:* ${form.day} ${form.month} ${form.year}`,
-      `*Time:* ${form.hour} ${form.period}`,
-      "",
-      "_Sent via Corporate Eye Clinic website_",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    setLoading(true);
+    try {
+      const dateStr = `${form.day} ${form.month} ${form.year}`;
+      const timeSlot = `${form.hour} ${form.period}`;
+      const serviceName =
+        services.find((s) => s.id === form.service)?.title ||
+        form.service ||
+        "General eye exam";
 
-    window.open(
-      `https://wa.me/2348033372738?text=${encodeURIComponent(msg)}`,
-      "_blank",
-    );
-    setSubmitted(true);
+      // Save to Supabase
+      const { error } = await supabase.from("bookings").insert([
+        {
+          name: form.name,
+          phone: form.phone,
+          service: serviceName,
+          doctor: form.doctor,
+          date: dateStr,
+          time_slot: timeSlot,
+        },
+      ]);
+
+      if (error) throw error;
+
+      // Open WhatsApp with pre-filled message
+      const msg = [
+        "👁️ *New Appointment Request*",
+        "",
+        `*Name:* ${form.name}`,
+        `*Phone:* ${form.phone}`,
+        `*Service:* ${serviceName}`,
+        `*Doctor:* ${form.doctor}`,
+        `*Date:* ${dateStr}`,
+        `*Time:* ${timeSlot}`,
+        "",
+        "_Sent via Corporate Eye Clinic website_",
+      ].join("\n");
+
+      window.open(
+        `https://wa.me/2348033372738?text=${encodeURIComponent(msg)}`,
+        "_blank",
+      );
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Booking failed:", err);
+      setErrors({
+        submit: "Something went wrong. Please try again or call us directly.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -180,9 +260,8 @@ export default function BookingModal({ onClose }) {
               </div>
               <h3>Almost there! 🎉</h3>
               <p>
-                A WhatsApp message has been pre-filled with your details. Just
-                tap <strong>Send</strong> in WhatsApp to confirm your booking —
-                the clinic will reply shortly.
+                Your slot is reserved. A WhatsApp message has been pre-filled —
+                just tap <strong>Send</strong> to confirm with the clinic.
               </p>
               <button className="btn btn--primary" onClick={onClose}>
                 Done
@@ -268,9 +347,14 @@ export default function BookingModal({ onClose }) {
                   </div>
                 </div>
 
-                {/* Date — own row */}
+                {/* Date */}
                 <div className="bm-field">
-                  <label>DATE</label>
+                  <label>
+                    DATE{" "}
+                    {dayFull && (
+                      <span className="bm-slot-full">— Day fully booked</span>
+                    )}
+                  </label>
                   <div className="bm-date-row">
                     <div className="bm-select-wrap" style={{ flex: 1 }}>
                       <select value={form.day} onChange={set("day")}>
@@ -284,16 +368,31 @@ export default function BookingModal({ onClose }) {
                     <div className="bm-select-wrap" style={{ flex: 2 }}>
                       <select value={form.month} onChange={set("month")}>
                         <option value="">Month</option>
-                        {MONTHS.map((m) => (
-                          <option key={m}>{m}</option>
-                        ))}
+                        {MONTHS_ALL.map((m, i) => {
+                          const isPast =
+                            Number(form.year) === THIS_YEAR &&
+                            i + 1 < THIS_MONTH;
+                          return (
+                            <option
+                              key={m}
+                              value={m}
+                              disabled={isPast}
+                              style={isPast ? { color: "#ccc" } : {}}
+                            >
+                              {m}
+                              {isPast ? " (past)" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <ChevronIcon />
                     </div>
                     <div className="bm-select-wrap" style={{ flex: 1 }}>
                       <select value={form.year} onChange={set("year")}>
                         {YEARS.map((y) => (
-                          <option key={y}>{y}</option>
+                          <option key={y} value={String(y)}>
+                            {y}
+                          </option>
                         ))}
                       </select>
                       <ChevronIcon />
@@ -304,24 +403,52 @@ export default function BookingModal({ onClose }) {
                   )}
                 </div>
 
-                {/* Time — own row below date */}
+                {/* Time */}
                 <div className="bm-field">
-                  <label>TIME *</label>
+                  <label>
+                    TIME *{" "}
+                    {checkingSlots && (
+                      <span className="bm-checking">
+                        Checking availability…
+                      </span>
+                    )}
+                  </label>
                   <div className="bm-date-row">
                     <div
                       className={`bm-select-wrap${errors.hour ? " bm-select-wrap--error" : ""}`}
                       style={{ flex: 3 }}
                     >
-                      <select value={form.hour} onChange={set("hour")}>
+                      <select
+                        value={form.hour}
+                        onChange={set("hour")}
+                        disabled={dayFull}
+                      >
                         <option value="">Select time</option>
-                        {HOURS.map((h) => (
-                          <option key={h}>{h}</option>
-                        ))}
+                        {HOURS.map((h) => {
+                          const slotKey = `${h} ${form.period}`;
+                          const count = slotCounts[slotKey] || 0;
+                          const full = count >= MAX_PER_SLOT;
+                          return (
+                            <option
+                              key={h}
+                              value={h}
+                              disabled={full}
+                              style={full ? { color: "#ccc" } : {}}
+                            >
+                              {h}
+                              {full ? " — Full" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <ChevronIcon />
                     </div>
                     <div className="bm-select-wrap" style={{ flex: 1 }}>
-                      <select value={form.period} onChange={set("period")}>
+                      <select
+                        value={form.period}
+                        onChange={set("period")}
+                        disabled={dayFull}
+                      >
                         {PERIODS.map((p) => (
                           <option key={p}>{p}</option>
                         ))}
@@ -334,8 +461,16 @@ export default function BookingModal({ onClose }) {
                   )}
                 </div>
 
-                <button type="submit" className="bm-submit">
-                  BOOK AN APPOINTMENT
+                {errors.submit && (
+                  <div className="bm-error-banner">{errors.submit}</div>
+                )}
+
+                <button
+                  type="submit"
+                  className="bm-submit"
+                  disabled={loading || dayFull}
+                >
+                  {loading ? "Saving your slot…" : "BOOK AN APPOINTMENT"}
                 </button>
               </form>
             </>
