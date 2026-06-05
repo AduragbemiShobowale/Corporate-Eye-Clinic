@@ -161,38 +161,29 @@ export default function BookingModal({ onClose }) {
         form.service ||
         "General eye exam";
 
-      // Save to Supabase
-      const { error } = await supabase.from("bookings").insert([
-        {
-          name: form.name,
-          phone: form.phone,
-          service: serviceName,
-          doctor: form.doctor,
-          date: dateStr,
-          time_slot: timeSlot,
-        },
-      ]);
+      // 1. Save to Supabase
+      const booking = {
+        name: form.name,
+        phone: form.phone,
+        service: serviceName,
+        doctor: form.doctor,
+        date: dateStr,
+        time_slot: timeSlot,
+      };
 
+      const { error } = await supabase.from("bookings").insert([booking]);
       if (error) throw error;
 
-      // Open WhatsApp with pre-filled message
-      const msg = [
-        "👁️ *New Appointment Request*",
-        "",
-        `*Name:* ${form.name}`,
-        `*Phone:* ${form.phone}`,
-        `*Service:* ${serviceName}`,
-        `*Doctor:* ${form.doctor}`,
-        `*Date:* ${dateStr}`,
-        `*Time:* ${timeSlot}`,
-        "",
-        "_Sent via Corporate Eye Clinic website_",
-      ].join("\n");
-
-      window.open(
-        `https://wa.me/2348033372738?text=${encodeURIComponent(msg)}`,
-        "_blank",
+      // 2. Trigger email notification via Edge Function
+      await fetch(
+        "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-booking-email",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(booking),
+        },
       );
+
       setSubmitted(true);
     } catch (err) {
       console.error("Booking failed:", err);
@@ -258,10 +249,11 @@ export default function BookingModal({ onClose }) {
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
-              <h3>Almost there! 🎉</h3>
+              <h3>Booking confirmed! 🎉</h3>
               <p>
-                Your slot is reserved. A WhatsApp message has been pre-filled —
-                just tap <strong>Send</strong> to confirm with the clinic.
+                Your appointment has been booked. The clinic has been notified
+                and will contact you on <strong>{form.phone}</strong> to
+                confirm.
               </p>
               <button className="btn btn--primary" onClick={onClose}>
                 Done
