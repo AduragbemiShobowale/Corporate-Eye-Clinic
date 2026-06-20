@@ -1,0 +1,92 @@
+.locations-soon {
+  position: relative;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-12) var(--space-6);
+}
+
+.locations-soon__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #faf8f5 0%, #ffffff 100%);
+  z-index: 0;
+}
+.locations-soon__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+}
+.locations-soon__blob--1 {
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, rgba(155,45,31,0.12) 0%, transparent 70%);
+  top: -80px; left: -60px;
+  animation: floatSlow 12s ease-in-out infinite;
+}
+.locations-soon__blob--2 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(200,149,10,0.12) 0%, transparent 70%);
+  bottom: -60px; right: -40px;
+  animation: floatSlow 14s ease-in-out infinite reverse;
+}
+
+.locations-soon__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.locations-soon__char {
+  margin-bottom: var(--space-6);
+  animation: float 5s ease-in-out infinite;
+}
+
+.locations-soon__badge {
+  display: inline-block;
+  background: #FFF8E1;
+  color: #A07200;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(160,114,0,0.25);
+}
+
+.locations-soon__title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+  line-height: 1.25;
+}
+
+.locations-soon__subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  margin-bottom: var(--space-8);
+}
+
+.locations-soon__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .locations-soon__char { width: 170px; }
+  .locations-soon__actions { flex-direction: column; width: 100%; }
+  .locations-soon__actions .btn { width: 100%; justify-content: center; }
+}

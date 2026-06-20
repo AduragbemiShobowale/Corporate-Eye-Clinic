@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { shopCategories } from "../data/siteData";
 import { useCart } from "../context/CartContext";
+import PrescriptionGlassesSection from "../components/ui/PrescriptionGlassesSection";
+import ContactLensPrescriptionSection from "../components/ui/ContactLensPrescriptionSection";
+import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
 import "./ShopPage.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
@@ -78,6 +81,15 @@ function formatNGN(n) {
 export default function ShopPage() {
   const [active, setActive] = useState("all");
   const { addToCart, items } = useCart();
+  const [successName, setSuccessName] = useState(null);
+  const [contactsMode, setContactsMode] = useState("regular"); // 'regular' | 'prescription'
+  const [prescriptionType, setPrescriptionType] = useState("glasses"); // 'glasses' | 'contacts'
+
+  // Reset contacts sub-mode whenever category changes away from contacts
+  const handleCategoryClick = (catId) => {
+    setActive(catId);
+    if (catId !== "contacts") setContactsMode("regular");
+  };
 
   const filtered =
     active === "all"
@@ -102,15 +114,15 @@ export default function ShopPage() {
           <h1>
             Shop <span>Eyewear</span>
           </h1>
-          {/* <p>
+          <p>
             Designer frames, contact lenses, and sunglasses — for every member
             of the family. 25% off your first contacts order.
-          </p> */}
+          </p>
         </div>
       </div>
 
       {/* ── Promo bar ── */}
-      {/* <div className="shop-promo">
+      <div className="shop-promo">
         <div className="container shop-promo__inner">
           <span className="badge badge--amber">Limited offer</span>
           <span className="shop-promo__text">
@@ -118,7 +130,7 @@ export default function ShopPage() {
             <code>FIRSTLENS</code> at checkout.
           </span>
         </div>
-      </div> */}
+      </div>
 
       <section className="section">
         <div className="container">
@@ -127,16 +139,73 @@ export default function ShopPage() {
               <button
                 key={cat.id}
                 className={
-                  "shop__filter-btn" + (active === cat.id ? " active" : "")
+                  "shop__filter-btn" +
+                  (active === cat.id ? " active" : "") +
+                  (cat.id === "prescription" ? " shop__filter-btn--rx" : "")
                 }
-                onClick={() => setActive(cat.id)}
+                onClick={() => handleCategoryClick(cat.id)}
               >
+                {cat.id === "prescription" && "📋 "}
                 {cat.label}
               </button>
             ))}
           </div>
 
-          {filtered.length === 0 ? (
+          {/* ── Contact Lenses: Regular vs Prescription inline switch ── */}
+          {active === "contacts" && (
+            <div className="shop__mode-switch">
+              <button
+                className={`shop__mode-btn${contactsMode === "regular" ? " active" : ""}`}
+                onClick={() => setContactsMode("regular")}
+              >
+                🛍️ Regular — browse & buy
+              </button>
+              <button
+                className={`shop__mode-btn${contactsMode === "prescription" ? " active" : ""}`}
+                onClick={() => setContactsMode("prescription")}
+              >
+                📋 I have a prescription
+              </button>
+            </div>
+          )}
+
+          {/* ── Prescription tab: Glasses vs Contacts switch ── */}
+          {active === "prescription" && (
+            <div className="shop__mode-switch">
+              <button
+                className={`shop__mode-btn${prescriptionType === "glasses" ? " active" : ""}`}
+                onClick={() => setPrescriptionType("glasses")}
+              >
+                👓 Glasses
+              </button>
+              <button
+                className={`shop__mode-btn${prescriptionType === "contacts" ? " active" : ""}`}
+                onClick={() => setPrescriptionType("contacts")}
+              >
+                👁️ Contact Lenses
+              </button>
+            </div>
+          )}
+
+          {/* ── Main content area: grid OR prescription form ── */}
+          {active === "prescription" ? (
+            prescriptionType === "glasses" ? (
+              <PrescriptionGlassesSection
+                onSuccess={(name) => setSuccessName(name)}
+                inline
+              />
+            ) : (
+              <ContactLensPrescriptionSection
+                onSuccess={(name) => setSuccessName(name)}
+                inline
+              />
+            )
+          ) : active === "contacts" && contactsMode === "prescription" ? (
+            <ContactLensPrescriptionSection
+              onSuccess={(name) => setSuccessName(name)}
+              inline
+            />
+          ) : filtered.length === 0 ? (
             <div className="shop__empty">
               <p>No products found in this category yet. Check back soon!</p>
             </div>
@@ -182,6 +251,15 @@ export default function ShopPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Small success confirmation modal ── */}
+      {successName !== null && (
+        <OrderRequestSuccessModal
+          name={successName}
+          onClose={() => setSuccessName(null)}
+        />
+      )}
+
       {/* ── Floating cart bar ── */}
       <FloatingCart />
     </>

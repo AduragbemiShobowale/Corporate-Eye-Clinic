@@ -383,17 +383,47 @@
   }
 }
 
-/* ─── Photo Hero override (replaces animated hero) ─────────── */
-.shop-page-hero {
-  min-height: 320px;
-  padding-block: var(--space-20);
+/* ─── Prescription filter pill ────────────────────────────────── */
+.shop__filter-btn--rx {
+  border-color: rgba(160, 114, 0, 0.3);
+  color: #a07200;
 }
-.shop-page-hero .page-hero__content {
+.shop__filter-btn--rx.active {
+  background: #a07200;
+  border-color: #a07200;
+  color: #fff;
+}
+
+/* ─── Regular / Prescription mode switch ─────────────────────── */
+.shop__mode-switch {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
   gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+.shop__mode-btn {
+  flex: 1;
+  min-width: 200px;
+  padding: 14px 18px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.shop__mode-btn:hover {
+  border-color: var(--teal-700);
+  color: var(--teal-700);
+}
+.shop__mode-btn.active {
+  background: var(--teal-50);
+  border-color: var(--teal-700);
+  color: var(--teal-700);
+  box-shadow: 0 2px 8px rgba(155, 45, 31, 0.1);
 }
 
 /* ─── Floating cart bar ───────────────────────────────────────── */

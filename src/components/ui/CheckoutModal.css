@@ -233,3 +233,93 @@
     padding: 0;
   }
 }
+
+/* ─── Fulfillment toggle ──────────────────────────────────────── */
+.checkout-toggle-row {
+  display: flex;
+  gap: 8px;
+}
+.checkout-toggle-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.checkout-toggle-btn:hover {
+  border-color: var(--teal-700);
+  color: var(--teal-700);
+}
+.checkout-toggle-btn.active {
+  background: var(--teal-50);
+  border-color: var(--teal-700);
+  color: var(--teal-700);
+}
+
+.checkout-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.checkout-select-wrap select {
+  width: 100%;
+  padding: 0.7rem 2rem 0.7rem 0.9rem;
+  border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  background: var(--white);
+  color: var(--color-text);
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+}
+.checkout-select-wrap select:focus {
+  border-color: var(--teal-600);
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.1);
+}
+.checkout-select-wrap svg {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: var(--gray-300);
+}
+.checkout-select-wrap--error select {
+  border-color: var(--teal-700) !important;
+}
+
+/* ─── Quote items in summary ──────────────────────────────────── */
+.checkout-summary__quote-tag {
+  display: inline-block;
+  background: #eef4ff;
+  color: #1e40af;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-left: 6px;
+}
+.checkout-summary__quote-note {
+  font-size: 0.75rem;
+  color: #1e40af;
+  background: #eef4ff;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-top: var(--space-3);
+  line-height: 1.5;
+}
+
+/* ─── Delivery fee line ───────────────────────────────────────── */
+.checkout-summary__delivery-fee {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  padding: var(--space-2) 0;
+  border-top: 1px dashed var(--color-border);
+  margin-top: var(--space-2);
+}

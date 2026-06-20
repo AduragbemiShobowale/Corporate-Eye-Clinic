@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { contactInfo, hours, services } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
+import { supabase } from "../lib/supabase";
 import "./ContactPage.css";
 
 export default function ContactPage() {
@@ -9,9 +10,11 @@ export default function ContactPage() {
     email: "",
     phone: "",
     service: "",
+    location: "",
     date: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const formRef = useScrollReveal({ threshold: 0.05 });
@@ -39,10 +42,11 @@ export default function ContactPage() {
     if (!form.service) e.service = "Please select a service";
     if (!form.message.trim())
       e.message = "Please tell us more about your needs";
+    if (!form.location) e.location = "Please select a preferred location";
     return e;
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) {
@@ -50,7 +54,6 @@ export default function ContactPage() {
       return;
     }
 
-    // Build WhatsApp message
     const serviceLabels = {
       "eye-exam": "Comprehensive Eye Examination",
       glaucoma: "Glaucoma Management",
@@ -61,26 +64,60 @@ export default function ContactPage() {
       general: "General eye exam",
       other: "Other / Not sure",
     };
-    const msg = [
-      "👁️ *New Appointment Request*",
-      "",
-      `*Name:* ${form.name}`,
-      `*Email:* ${form.email}`,
-      form.phone ? `*Phone:* ${form.phone}` : null,
-      form.service
-        ? `*Service:* ${serviceLabels[form.service] || form.service}`
-        : null,
-      form.date ? `*Preferred date:* ${form.date}` : null,
-      form.message ? `*Notes:* ${form.message}` : null,
-      "",
-      "_Sent via Corporate Eye Clinic website_",
-    ]
-      .filter(Boolean)
-      .join("\n");
 
-    const url = `https://wa.me/2349068549539?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
-    setSubmitted(true);
+    const locationObj = contactInfo.locations.find(
+      (l) => l.name === form.location,
+    );
+
+    const payload = {
+      name: form.name,
+      email: form.email,
+      phone: form.phone || null,
+      service: form.service
+        ? serviceLabels[form.service] || form.service
+        : null,
+      location: locationObj ? locationObj.short : form.location,
+      preferred_date: form.date || null,
+      message: form.message,
+    };
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .insert([payload]);
+      if (error) throw error;
+
+      // Email is best-effort — never block the success state if this fails
+      try {
+        await fetch(
+          "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-contact-email",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg",
+            },
+            body: JSON.stringify(payload),
+          },
+        );
+      } catch (emailErr) {
+        console.error(
+          "Contact email notification failed (message still saved):",
+          emailErr,
+        );
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Contact form submission failed:", err);
+      setErrors({
+        submit: "Something went wrong. Please try again or call us directly.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -175,11 +212,11 @@ export default function ContactPage() {
                 <div className="contact__success-icon">
                   <CheckCircleIcon />
                 </div>
-                <h3>Almost there! 🎉</h3>
+                <h3>Message received! 🎉</h3>
                 <p>
-                  A WhatsApp message has been pre-filled with your details. Just
-                  tap <strong>Send</strong> in WhatsApp to confirm — the clinic
-                  will reply shortly.
+                  Thank you, <strong>{form.name}</strong>. The clinic has been
+                  notified and will get back to you on{" "}
+                  <strong>{form.email}</strong> shortly.
                 </p>
                 <button
                   className="btn btn--primary"
@@ -190,12 +227,13 @@ export default function ContactPage() {
                       email: "",
                       phone: "",
                       service: "",
+                      location: "",
                       date: "",
                       message: "",
                     });
                   }}
                 >
-                  Book another
+                  Send another message
                 </button>
               </div>
             ) : (
@@ -292,6 +330,31 @@ export default function ContactPage() {
                   )}
                 </div>
                 <div className="contact__field">
+                  <label htmlFor="location">Preferred location *</label>
+                  <div
+                    className={`contact__select-wrap${errors.location ? " input--error" : ""}`}
+                  >
+                    <select
+                      id="location"
+                      name="location"
+                      value={form.location}
+                      onChange={handle}
+                      aria-invalid={!!errors.location}
+                    >
+                      <option value="">Select a location</option>
+                      {contactInfo.locations.map((loc) => (
+                        <option key={loc.name} value={loc.name}>
+                          {loc.name} — {loc.short}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronIcon />
+                  </div>
+                  {errors.location && (
+                    <span className="field-error">{errors.location}</span>
+                  )}
+                </div>
+                <div className="contact__field">
                   <label htmlFor="message">Additional notes *</label>
                   <textarea
                     id="message"
@@ -307,11 +370,15 @@ export default function ContactPage() {
                     <span className="field-error">{errors.message}</span>
                   )}
                 </div>
+                {errors.submit && (
+                  <div className="contact__error-banner">{errors.submit}</div>
+                )}
                 <button
                   type="submit"
                   className="btn btn--primary btn--lg contact__submit"
+                  disabled={loading}
                 >
-                  Submit booking request
+                  {loading ? "Sending…" : "Submit booking request"}
                 </button>
               </form>
             )}
@@ -326,15 +393,6 @@ export default function ContactPage() {
               <h3 className="contact__info-title">Get in touch</h3>
               <div className="contact__info-list">
                 {[
-                  {
-                    icon: <PinIcon />,
-                    label: "Address",
-                    value: contactInfo.address,
-                    href:
-                      "https://maps.google.com/?q=" +
-                      encodeURIComponent(contactInfo.address),
-                    external: true,
-                  },
                   {
                     icon: <PhoneIcon />,
                     label: "Phone",
@@ -367,6 +425,34 @@ export default function ContactPage() {
                       <span className="contact__info-label">{item.label}</span>
                       <span className="contact__info-value">{item.value}</span>
                     </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Our Locations ── */}
+            <div className="card contact__locations-card">
+              <h3 className="contact__info-title">Our locations</h3>
+              <div className="contact__locations-list">
+                {contactInfo.locations.map((loc) => (
+                  <a
+                    key={loc.name}
+                    href={
+                      "https://maps.google.com/?q=" +
+                      encodeURIComponent(loc.address)
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="contact__location-item"
+                  >
+                    <span className="contact__location-emoji">{loc.emoji}</span>
+                    <div>
+                      <span className="contact__location-name">{loc.name}</span>
+                      <span className="contact__location-address">
+                        {loc.address}
+                      </span>
+                    </div>
+                    <ArrowIcon />
                   </a>
                 ))}
               </div>
@@ -719,6 +805,21 @@ const CheckCircleIcon = () => (
   >
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
     <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
+const ArrowIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
   </svg>
 );
 const PinIcon = () => (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { services } from "../../data/siteData";
+import { services, contactInfo } from "../../data/siteData";
 import { supabase } from "../../lib/supabase";
 import "./BookingModal.css";
 
@@ -50,6 +50,7 @@ export default function BookingModal({ onClose }) {
   const [form, setForm] = useState({
     service: "",
     doctor: "",
+    location: "",
     name: "",
     phone: "",
     day: "",
@@ -57,6 +58,8 @@ export default function BookingModal({ onClose }) {
     year: String(THIS_YEAR),
     hour: "",
     period: "AM",
+    bookingType: "individual",
+    groupSize: "",
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -113,6 +116,7 @@ export default function BookingModal({ onClose }) {
   const set = (k) => (e) => {
     let value = e.target.value;
     if (k === "phone" && !/^[0-9\s+\-()]*$/.test(value)) return;
+    if (k === "groupSize" && !/^[0-9]*$/.test(value)) return;
     setForm((f) => ({ ...f, [k]: value }));
     if (errors[k]) setErrors((p) => ({ ...p, [k]: "" }));
   };
@@ -121,11 +125,20 @@ export default function BookingModal({ onClose }) {
     const e = {};
     if (!form.service) e.service = "Please select a service";
     if (!form.doctor) e.doctor = "Please select a doctor";
+    if (!form.location) e.location = "Please select a location";
     if (!form.name.trim()) e.name = "Your name is required";
     if (!form.phone.trim()) {
       e.phone = "Phone number is required";
     } else if (form.phone.replace(/[\s+\-()]/g, "").length < 11) {
       e.phone = "Phone number must be at least 11 digits";
+    }
+    if (form.bookingType === "group") {
+      if (!form.groupSize || Number(form.groupSize) < 2) {
+        e.groupSize = "Enter the number of people (2 or more)";
+      }
+      if (!form.organizationName.trim()) {
+        e.organizationName = "Company / school name is required";
+      }
     }
     if (!form.day || !form.month || !form.year)
       e.date = "Please select a complete date";
@@ -154,6 +167,10 @@ export default function BookingModal({ onClose }) {
         services.find((s) => s.id === form.service)?.title ||
         form.service ||
         "General eye exam";
+      const locationObj = contactInfo.locations.find(
+        (l) => l.name === form.location,
+      );
+
       const booking = {
         name: form.name,
         phone: form.phone,
@@ -161,6 +178,12 @@ export default function BookingModal({ onClose }) {
         doctor: form.doctor,
         date: dateStr,
         time_slot: timeSlot,
+        location: locationObj ? locationObj.short : form.location,
+        booking_type: form.bookingType,
+        group_size:
+          form.bookingType === "group" ? Number(form.groupSize) : null,
+        organization_name:
+          form.bookingType === "group" ? form.organizationName : null,
       };
 
       const { error } = await supabase.from("bookings").insert([booking]);
@@ -306,6 +329,27 @@ export default function BookingModal({ onClose }) {
                   </div>
                 </div>
 
+                {/* Location */}
+                <div className="bm-field">
+                  <label>LOCATION *</label>
+                  <div
+                    className={`bm-select-wrap${errors.location ? " bm-select-wrap--error" : ""}`}
+                  >
+                    <select value={form.location} onChange={set("location")}>
+                      <option value="">Select Location</option>
+                      {contactInfo.locations.map((loc) => (
+                        <option key={loc.name} value={loc.name}>
+                          {loc.name} — {loc.short}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronIcon />
+                  </div>
+                  {errors.location && (
+                    <span className="bm-field-error">{errors.location}</span>
+                  )}
+                </div>
+
                 {/* Name + Phone */}
                 <div className="bm-row">
                   <div className="bm-field">
@@ -335,6 +379,76 @@ export default function BookingModal({ onClose }) {
                       <span className="bm-field-error">{errors.phone}</span>
                     )}
                   </div>
+                </div>
+
+                {/* Group / Individual */}
+                <div className="bm-field">
+                  <label>BOOKING TYPE</label>
+                  <div className="bm-toggle-row">
+                    <button
+                      type="button"
+                      className={`bm-toggle-btn${form.bookingType === "individual" ? " active" : ""}`}
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          bookingType: "individual",
+                          groupSize: "",
+                          organizationName: "",
+                        }))
+                      }
+                    >
+                      👤 Individual
+                    </button>
+                    <button
+                      type="button"
+                      className={`bm-toggle-btn${form.bookingType === "group" ? " active" : ""}`}
+                      onClick={() =>
+                        setForm((f) => ({ ...f, bookingType: "group" }))
+                      }
+                    >
+                      👥 Group (School/Work)
+                    </button>
+                  </div>
+                  {form.bookingType === "group" && (
+                    <div className="bm-group-size">
+                      <label>COMPANY / SCHOOL NAME *</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Bright Future Academy"
+                        value={form.organizationName}
+                        onChange={set("organizationName")}
+                        className={
+                          errors.organizationName ? "bm-input--error" : ""
+                        }
+                      />
+                      {errors.organizationName && (
+                        <span className="bm-field-error">
+                          {errors.organizationName}
+                        </span>
+                      )}
+
+                      <label style={{ marginTop: "12px", display: "block" }}>
+                        NUMBER OF PEOPLE *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 25"
+                        value={form.groupSize}
+                        onChange={set("groupSize")}
+                        inputMode="numeric"
+                        className={errors.groupSize ? "bm-input--error" : ""}
+                      />
+                      {errors.groupSize && (
+                        <span className="bm-field-error">
+                          {errors.groupSize}
+                        </span>
+                      )}
+                      <p className="bm-group-note">
+                        We'll reach out to schedule a convenient time for your
+                        group.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Date */}

@@ -420,3 +420,60 @@
   border-radius: 999px;
   transition: width 0.5s ease;
 }
+
+/* ─── Group / Individual toggle ───────────────────────────────── */
+.bm-toggle-row {
+  display: flex;
+  gap: 8px;
+}
+.bm-toggle-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.bm-toggle-btn:hover {
+  border-color: #9b2d1f;
+  color: #9b2d1f;
+}
+.bm-toggle-btn.active {
+  background: #fdf0ee;
+  border-color: #9b2d1f;
+  color: #9b2d1f;
+}
+.bm-group-size {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.bm-group-size label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.bm-group-size input {
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+}
+.bm-group-size input:focus {
+  border-color: #9b2d1f;
+  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.1);
+}
+.bm-group-note {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 6px;
+  line-height: 1.5;
+}

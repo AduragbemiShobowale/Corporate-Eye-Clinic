@@ -693,3 +693,68 @@
   font-weight: 600;
   margin-top: 3px;
 }
+
+/* ─── Our Locations card ─────────────────────────────────────── */
+.contact__locations-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.contact__location-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background var(--transition);
+}
+.contact__location-item:hover {
+  background: var(--off-white);
+}
+.contact__location-emoji {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.contact__location-item > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.contact__location-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.contact__location-address {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+.contact__location-item svg {
+  color: var(--gray-300);
+  flex-shrink: 0;
+  transition:
+    transform var(--transition),
+    color var(--transition);
+}
+.contact__location-item:hover svg {
+  color: var(--teal-700);
+  transform: translateX(3px);
+}
+
+/* ─── Error banner ────────────────────────────────────────────── */
+.contact__error-banner {
+  background: var(--teal-50);
+  border: 1px solid rgba(155, 45, 31, 0.2);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--teal-700);
+  font-weight: 500;
+}
+.contact__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
