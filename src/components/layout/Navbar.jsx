@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useCart } from "../../context/CartContext";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { navLinks, services } from "../../data/siteData";
 import BookingModal from "../ui/BookingModal";
@@ -11,7 +10,6 @@ export default function Navbar() {
   const [activeDropdown, setActive] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
-  const { count, setDrawer } = useCart();
   const dropdownRef = useRef(null);
   const hoverTimeout = useRef(null);
 
@@ -55,10 +53,11 @@ export default function Navbar() {
       >
         <div className="navbar__inner container">
           <Link to="/" className="navbar__logo">
-            <span className="navbar__logo-icon">
-              <EyeIcon />
-            </span>
-            Corporate Eye Clinic
+            <img
+              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              alt="Corporate Eye Clinic"
+              className="navbar__logo-img"
+            />
           </Link>
 
           <nav className="navbar__nav" aria-label="Main navigation">
@@ -231,14 +230,6 @@ export default function Navbar() {
 
           <div className="navbar__actions">
             <button
-              className="navbar__cart-btn"
-              onClick={() => setDrawer(true)}
-              aria-label="Open cart"
-            >
-              <CartIcon />
-              {count > 0 && <span className="navbar__cart-badge">{count}</span>}
-            </button>
-            <button
               className="btn btn--primary btn--sm"
               onClick={() => setShowModal(true)}
             >
@@ -259,26 +250,6 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div className={`navbar__mobile${menuOpen ? " open" : ""}`}>
-          {/* Explicit close button at top of mobile menu */}
-          <button
-            className="navbar__mobile-close"
-            onClick={() => setMenuOpen(false)}
-            aria-label="Close menu"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-            Close
-          </button>
           <nav className="navbar__mobile-nav">
             <NavLink
               to="/"
@@ -342,21 +313,6 @@ export default function Navbar() {
               >
                 Book an eye exam
               </button>
-              <button
-                className="btn btn--outline navbar__mobile-cart-btn"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setDrawer(true);
-                }}
-              >
-                <CartIcon />
-                View cart
-                {count > 0 && (
-                  <span className="navbar__cart-badge navbar__cart-badge--inline">
-                    {count}
-                  </span>
-                )}
-              </button>
               <a
                 href="https://wa.me/2348033372738"
                 className="btn btn--outline"
@@ -405,22 +361,6 @@ const ChevronIcon = ({ rotated }) => (
     strokeLinejoin="round"
   >
     <polyline points="6 9 12 15 18 9" />
-  </svg>
-);
-const CartIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="9" cy="21" r="1" />
-    <circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
   </svg>
 );
 const WaIcon = () => (

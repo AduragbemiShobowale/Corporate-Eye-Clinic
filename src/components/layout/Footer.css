@@ -17,6 +17,13 @@
   color: var(--white);
   margin-bottom: var(--space-4);
 }
+.footer__logo-img {
+  height: 80px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
 .footer__logo-icon {
   width: 32px; height: 32px;
   background: var(--teal-700);

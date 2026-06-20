@@ -33,6 +33,14 @@
   text-decoration: none;
   letter-spacing: -0.01em;
 }
+.navbar__logo-img {
+  height: 90px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  filter: brightness(1.05);
+}
+
 .navbar__logo-icon {
   width: 36px;
   height: 36px;
@@ -43,7 +51,7 @@
   justify-content: center;
   color: var(--white);
   flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(155, 45, 31, 0.3);
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.3);
 }
 
 /* ─── Desktop Nav ─────────────────────────────────────────────── */
@@ -133,7 +141,7 @@
 .navbar__actions .btn--primary {
   background: var(--teal-700);
   border-color: var(--teal-700);
-  box-shadow: 0 2px 14px rgba(155, 45, 31, 0.35);
+  box-shadow: 0 2px 14px rgba(198, 40, 40, 0.4);
   transition:
     background var(--transition),
     box-shadow var(--transition),
@@ -142,7 +150,7 @@
 .navbar__actions .btn--primary:hover {
   background: var(--teal-800);
   border-color: var(--teal-800);
-  box-shadow: 0 4px 20px rgba(155, 45, 31, 0.45);
+  box-shadow: 0 4px 20px rgba(198, 40, 40, 0.55);
   transform: translateY(-1px);
 }
 
@@ -202,7 +210,7 @@
   overflow-y: auto;
   transform: translateX(100%);
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-  padding-top: calc(var(--nav-height) + 16px);
+  padding-top: calc(var(--nav-height) + 48px);
 }
 .navbar__mobile.open {
   transform: translateX(0);
@@ -272,7 +280,7 @@
 .navbar__mobile-cta .btn--primary {
   background: var(--teal-700);
   border-color: var(--teal-700);
-  box-shadow: 0 4px 20px rgba(155, 45, 31, 0.35);
+  box-shadow: 0 4px 20px rgba(198, 40, 40, 0.4);
   width: 100%;
   justify-content: center;
 }
@@ -413,27 +421,4 @@
   .navbar__hamburger {
     display: flex;
   }
-}
-
-/* ─── Mobile explicit close button ──────────────────────────── */
-.navbar__mobile-close {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--white);
-  border-radius: var(--radius-full);
-  padding: 8px 16px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition);
-  z-index: 10;
-}
-.navbar__mobile-close:hover {
-  background: rgba(255, 255, 255, 0.18);
 }

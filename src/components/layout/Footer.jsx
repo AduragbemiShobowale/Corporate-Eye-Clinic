@@ -10,10 +10,11 @@ export default function Footer() {
       <div className="footer__top container">
         <div className="footer__brand">
           <Link to="/" className="footer__logo">
-            <span className="footer__logo-icon">
-              <EyeIcon />
-            </span>
-            Corporate Eye Clinic
+            <img
+              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              alt="Corporate Eye Clinic"
+              className="footer__logo-img"
+            />
           </Link>
           <p className="footer__tagline">
             Providing affordable, high-quality eye care to the people of Ibadan
@@ -108,14 +109,15 @@ export default function Footer() {
             ))}
           </ul>
           <div className="footer__contact">
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(contactInfo.address)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="footer__contact-item"
-            >
-              <PinIcon /> {contactInfo.address}
-            </a>
+            {contactInfo.locations.map(loc => (
+              <a key={loc.name}
+                href={`https://maps.google.com/?q=${encodeURIComponent(loc.address)}`}
+                target="_blank" rel="noreferrer"
+                className="footer__contact-item"
+              >
+                <PinIcon /> {loc.short}
+              </a>
+            ))}
             <a
               href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}
               className="footer__contact-item"
