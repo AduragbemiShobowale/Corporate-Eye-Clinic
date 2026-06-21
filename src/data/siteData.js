@@ -239,6 +239,7 @@ export const shopCategories = [
   { id: "for-him", label: "For Him" },
   { id: "for-her", label: "For Her" },
   { id: "for-kids", label: "For Kids" },
+  { id: "prescription", label: "Prescription" },
 ];
 
 // ─── Contact & Hours ───────────────────────────────────────────────────────────

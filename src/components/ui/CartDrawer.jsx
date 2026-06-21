@@ -61,18 +61,23 @@ export default function CartDrawer() {
             </div>
           ) : (
             <ul className="cart-drawer__items">
-              {items.map(({ product, qty }) => (
-                <li key={product.id} className="cart-item">
+              {items.map(({ product, qty, options, key }) => (
+                <li key={key} className="cart-item">
                   <div className="cart-item__illustration">
                     <EyeglassIllustration category={product.category[0]} />
                   </div>
                   <div className="cart-item__info">
                     <p className="cart-item__name">{product.name}</p>
+                    {options && (
+                      <p className="cart-item__options">
+                        RE: {options.re} · LE: {options.le} · {options.color}
+                      </p>
+                    )}
                     <p className="cart-item__price">{fmt(product.price)}</p>
                     <div className="cart-item__qty">
                       <button
                         className="cart-item__qty-btn"
-                        onClick={() => updateQty(product.id, qty - 1)}
+                        onClick={() => updateQty(key, qty - 1)}
                         aria-label="Decrease quantity"
                       >
                         −
@@ -80,7 +85,7 @@ export default function CartDrawer() {
                       <span>{qty}</span>
                       <button
                         className="cart-item__qty-btn"
-                        onClick={() => updateQty(product.id, qty + 1)}
+                        onClick={() => updateQty(key, qty + 1)}
                         aria-label="Increase quantity"
                       >
                         +
@@ -93,7 +98,7 @@ export default function CartDrawer() {
                     </p>
                     <button
                       className="cart-item__remove"
-                      onClick={() => removeFromCart(product.id)}
+                      onClick={() => removeFromCart(key)}
                       aria-label="Remove item"
                     >
                       <TrashIcon />

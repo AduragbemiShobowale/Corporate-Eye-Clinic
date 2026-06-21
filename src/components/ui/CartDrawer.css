@@ -332,3 +332,21 @@
   background: var(--amber-400);
   color: #000;
 }
+
+/* ─── Contact lens options display ────────────────────────────── */
+.cart-item__options {
+  font-size: 0.7rem;
+  color: var(--teal-700);
+  font-weight: 600;
+  margin-bottom: 4px;
+  background: var(--teal-50);
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* ─── Quote item indicator ─────────────────────────────────────── */
+.cart-item__options--quote {
+  background: #eef4ff;
+  color: #1e40af;
+}

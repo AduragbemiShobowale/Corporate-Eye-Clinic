@@ -7,7 +7,7 @@ import "./CheckoutModal.css";
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
 
 // ── Replace with your real Paystack public key ──
-const PAYSTACK_PUBLIC_KEY = "pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const PAYSTACK_PUBLIC_KEY = "pk_test_1b9fdf16809a6da56ce4f9e59592732352bc8cf7";
 const DELIVERY_FEE = 3500; // ₦3,500 flat fee — added only when Dispatch/Delivery is selected
 
 export default function CheckoutModal({ onClose }) {
@@ -112,6 +112,15 @@ export default function CheckoutModal({ onClose }) {
       setErrors(errs);
       return;
     }
+
+    if (PAYSTACK_PUBLIC_KEY.includes("xxxxxxxx")) {
+      setErrors({
+        submit:
+          "Payments are not yet configured — the Paystack public key is still a placeholder. Replace PAYSTACK_PUBLIC_KEY in CheckoutModal.jsx with your real key.",
+      });
+      return;
+    }
+
     setStep("paying");
 
     const launch = () => {
@@ -140,10 +149,22 @@ export default function CheckoutModal({ onClose }) {
             },
           ],
         },
-        callback: async (response) => {
-          await saveOrderAndNotify(response.reference);
-          clearCart();
-          setStep("success");
+        // IMPORTANT: must be a plain (non-async) function — Paystack's inline.js
+        // validates callback.constructor === Function, and async functions fail
+        // that check (their constructor is AsyncFunction), causing
+        // "Attribute callback must be a valid function".
+        callback: function (response) {
+          saveOrderAndNotify(response.reference)
+            .then(() => {
+              clearCart();
+              setStep("success");
+            })
+            .catch((err) => {
+              console.error("Post-payment save failed:", err);
+              // Payment already succeeded — still show success to the customer
+              clearCart();
+              setStep("success");
+            });
         },
         onClose: () => setStep("form"),
       });
