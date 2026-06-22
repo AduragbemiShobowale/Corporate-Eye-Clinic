@@ -7,7 +7,7 @@ import "./CheckoutModal.css";
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
 
 // ── Replace with your real Paystack public key ──
-const PAYSTACK_PUBLIC_KEY = "pk_test_1b9fdf16809a6da56ce4f9e59592732352bc8cf7";
+const PAYSTACK_PUBLIC_KEY = "pk_test_e893b29a3a484c94b65ccc01dfbbcbc177726ffe";
 const DELIVERY_FEE = 3500; // ₦3,500 flat fee — added only when Dispatch/Delivery is selected
 
 export default function CheckoutModal({ onClose }) {
