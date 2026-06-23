@@ -4,6 +4,14 @@ import { useAdminAuth } from "../context/AdminAuthContext";
 import { useNavigate } from "react-router-dom";
 import "./TablePage.css";
 
+// Maps the profile branch name (stored in profiles table) to the
+// short location value (stored in bookings.location from BookingModal)
+const BRANCH_TO_LOCATION = {
+  "Head Office — Bodija": "Royal Mall, Bodija, Ibadan",
+  "Oluyole Branch": "Alaafin Avenue, Oluyole Estate, Ibadan",
+  "New Bodija Branch": "3B Aare Avenue, New Bodija, Ibadan",
+};
+
 const BADGE = {
   upcoming: "admin-badge--upcoming",
   completed: "admin-badge--completed",
@@ -36,7 +44,8 @@ export default function DoctorAppointments() {
         .eq("date", dateStr)
         .order("time_slot");
 
-      if (profile?.branch) q = q.eq("location", profile.branch);
+      const locationValue = BRANCH_TO_LOCATION[profile?.branch];
+      if (locationValue) q = q.eq("location", locationValue);
 
       const { data } = await q;
       setAppts(data || []);

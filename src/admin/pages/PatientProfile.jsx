@@ -63,22 +63,30 @@ export default function PatientProfile() {
 
   const [patient, setPatient] = useState(null);
   const [records, setRecords] = useState([]);
+  const [doctorMap, setDoctorMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [entry, setEntry] = useState({ ...EMPTY_ENTRY });
   const [saving, setSaving] = useState(false);
 
   async function load() {
-    const [{ data: pat }, { data: recs }] = await Promise.all([
+    const [{ data: pat }, { data: recs }, { data: profs }] = await Promise.all([
       supabase.from("patients").select("*").eq("id", id).single(),
       supabase
         .from("patient_records")
         .select("*")
         .eq("patient_id", id)
         .order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, full_name, role"),
     ]);
     setPatient(pat);
     setRecords(recs || []);
+    // Build a map of auth user id → display name for the audit trail
+    const map = {};
+    (profs || []).forEach((p) => {
+      map[p.id] = p.full_name;
+    });
+    setDoctorMap(map);
     setLoading(false);
   }
 
@@ -319,7 +327,18 @@ export default function PatientProfile() {
                       minute: "2-digit",
                     })}
                   </p>
-                  <p className="pp-entry-branch">{r.branch}</p>
+                  <p className="pp-entry-branch">
+                    {r.branch}
+                    {r.created_by && doctorMap[r.created_by] && (
+                      <>
+                        {" "}
+                        ·{" "}
+                        <span className="pp-entry-doctor">
+                          👨‍⚕️ {doctorMap[r.created_by]}
+                        </span>
+                      </>
+                    )}
+                  </p>
                 </div>
                 <span className="pp-entry-num">Entry {records.length - i}</span>
               </div>

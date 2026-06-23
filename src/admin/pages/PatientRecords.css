@@ -1,117 +1,313 @@
+.pr-page {
+  margin: calc(-1 * var(--space-8));
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────── */
+.pr-hero {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--navy-800) 0%,
+    var(--navy-700) 60%,
+    #1e3a7a 100%
+  );
+  padding: var(--space-8) var(--space-8) var(--space-10);
+  overflow: hidden;
+}
+
+.pr-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 149, 10, 0.12);
+  pointer-events: none;
+}
+.pr-ring--1 {
+  width: 320px;
+  height: 320px;
+  top: -80px;
+  right: -60px;
+}
+.pr-ring--2 {
+  width: 220px;
+  height: 220px;
+  top: -30px;
+  right: -10px;
+  box-shadow: 0 0 0 40px rgba(200, 149, 10, 0.04);
+}
+.pr-ring--3 {
+  width: 120px;
+  height: 120px;
+  top: 20px;
+  right: 40px;
+  border-color: rgba(200, 149, 10, 0.2);
+}
+
+.pr-hero-eye {
+  position: absolute;
+  right: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 110px;
+  height: 55px;
+  color: var(--amber-400);
+}
+
+.pr-hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.pr-hero-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--white);
+  margin: 0 0 var(--space-1);
+  letter-spacing: -0.02em;
+}
+
+.pr-hero-sub {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.pr-new-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  background: var(--amber-400);
+  color: var(--navy-800);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+.pr-new-btn:hover {
+  background: var(--amber-300);
+}
+
+/* ── Floating search bar ──────────────────────────────────────────── */
+/* Lives between hero and body, pulled UP by negative margin so it
+   visually overlaps the hero footer and sits half-in, half-out */
+.pr-search-float {
+  position: relative;
+  z-index: 10;
+  padding: 0 var(--space-8);
+  margin-top: -28px; /* half the input height — overlaps hero */
+  margin-bottom: var(--space-6);
+}
+
 .pr-search-wrap {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: var(--space-4);
 }
 
 .pr-search-icon {
   position: absolute;
   left: var(--space-4);
-  font-size: 16px;
+  color: var(--color-text-muted);
+  display: flex;
   pointer-events: none;
 }
 
 .pr-search {
   width: 100%;
-  max-width: 520px;
-  padding: var(--space-4) var(--space-4) var(--space-4) 44px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-4) 44px var(--space-4) 48px;
+  border: none;
+  border-radius: var(--radius-xl);
   font-size: var(--font-size-base);
   font-family: var(--font-sans);
   background: var(--white);
   outline: none;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.15s;
+  color: var(--color-text);
 }
 
 .pr-search:focus {
-  border-color: var(--navy-800);
-  box-shadow: 0 0 0 3px rgba(13, 27, 62, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(200, 149, 10, 0.3);
 }
 
-.pr-searching {
-  margin-left: var(--space-4);
+.pr-search::placeholder {
+  color: var(--gray-300);
+}
+
+.pr-search-clear {
+  position: absolute;
+  right: var(--space-4);
+  background: none;
+  border: none;
+  font-size: var(--font-size-sm);
+  color: var(--gray-300);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: color 0.12s;
+}
+.pr-search-clear:hover {
+  color: var(--color-text);
+}
+
+/* ── Body ─────────────────────────────────────────────────────────── */
+.pr-body {
+  padding: 0 var(--space-8) var(--space-8);
+}
+
+.pr-result-count {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
 }
 
-.pr-results {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+/* ── Patient card grid ─────────────────────────────────────────────── */
+.pr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
 }
 
-.pr-result-card {
+.pr-card {
   display: flex;
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
   background: var(--white);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   cursor: pointer;
   transition:
     border-color 0.12s,
-    box-shadow 0.12s;
+    box-shadow 0.12s,
+    transform 0.1s;
 }
 
-.pr-result-card:hover {
+.pr-card:hover {
   border-color: var(--navy-800);
-  box-shadow: 0 2px 8px rgba(13, 27, 62, 0.08);
+  box-shadow: 0 4px 16px rgba(13, 27, 62, 0.1);
+  transform: translateY(-1px);
 }
 
-.pr-result-serial {
-  font-family: monospace;
+.pr-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy-800), var(--navy-700));
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.pr-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pr-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 3px;
+  flex-wrap: wrap;
+}
+
+.pr-card-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--navy-800);
+  margin: 0;
+}
+
+.pr-card-serial {
+  font-family: monospace;
+  font-size: 11px;
   font-weight: 700;
   color: var(--teal-700);
   background: var(--teal-50);
   border: 1px solid var(--teal-100);
   border-radius: var(--radius-sm);
-  padding: 2px var(--space-3);
+  padding: 1px 6px;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-.pr-result-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.pr-result-name {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--navy-800);
+.pr-card-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
   margin: 0 0 2px;
 }
 
-.pr-result-meta {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+.pr-card-branch {
+  color: var(--amber-600);
+  font-weight: 500;
+}
+
+.pr-card-dob {
+  font-size: var(--font-size-xs);
+  color: var(--gray-300);
   margin: 0;
 }
 
-.pr-result-arrow {
+.pr-card-arrow {
   font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--navy-800);
+  color: var(--color-text-muted);
   flex-shrink: 0;
+  transition:
+    color 0.12s,
+    transform 0.12s;
+}
+.pr-card:hover .pr-card-arrow {
+  color: var(--navy-800);
+  transform: translateX(2px);
 }
 
-.pr-empty-state {
+/* ── Loading & empty ──────────────────────────────────────────────── */
+.pr-loading {
   text-align: center;
-  padding: var(--space-16) var(--space-8);
+  padding: var(--space-12);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
 }
 
-.pr-empty-icon {
-  font-size: 48px;
-  margin: 0 0 var(--space-4);
+.pr-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--navy-800);
+  border-radius: 50%;
+  animation: pr-spin 0.8s linear infinite;
+}
+
+@keyframes pr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pr-empty {
+  text-align: center;
+  padding: var(--space-12);
 }
 .pr-empty-title {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--navy-800);
   margin: 0 0 var(--space-2);
@@ -122,9 +318,9 @@
   margin: 0;
 }
 
-/* New patient modal */
+/* ── New patient modal ─────────────────────────────────────────────── */
 .pr-new-modal {
-  max-width: 500px !important;
+  max-width: 480px !important;
   text-align: left !important;
 }
 .pr-form {
@@ -146,4 +342,26 @@
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--gray-700);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .pr-page {
+    margin: calc(-1 * var(--space-5));
+  }
+  .pr-hero {
+    padding: var(--space-6) var(--space-5) var(--space-10);
+  }
+  .pr-search-float {
+    padding: 0 var(--space-5);
+  }
+  .pr-body {
+    padding: 0 var(--space-5) var(--space-6);
+  }
+  .pr-hero-eye {
+    display: none;
+  }
+  .pr-grid {
+    grid-template-columns: 1fr;
+  }
 }

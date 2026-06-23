@@ -1,4 +1,19 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useAdminAuth } from "./admin/context/AdminAuthContext";
+
+// Redirects to the correct landing page based on role
+function AdminIndex() {
+  const { profile, loading } = useAdminAuth();
+  if (loading) return null;
+  if (profile?.role === "doctor")
+    return <Navigate to="/admin/appointments" replace />;
+  return <Dashboard />;
+}
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
@@ -31,6 +46,7 @@ import Reporting from "./admin/pages/Reporting";
 import DoctorAppointments from "./admin/pages/DoctorAppointments";
 import PatientRecords from "./admin/pages/PatientRecords";
 import PatientProfile from "./admin/pages/PatientProfile";
+import Notifications from "./admin/pages/Notifications";
 
 export default function App() {
   return (
@@ -53,14 +69,7 @@ export default function App() {
                     </RoleGuard>
                   }
                 >
-                  <Route
-                    index
-                    element={
-                      <RoleGuard allowed={["super_admin", "staff"]}>
-                        <Dashboard />
-                      </RoleGuard>
-                    }
-                  />
+                  <Route index element={<AdminIndex />} />
                   <Route
                     path="products"
                     element={
@@ -98,6 +107,14 @@ export default function App() {
                     element={
                       <RoleGuard allowed={["super_admin"]}>
                         <PendingApprovals />
+                      </RoleGuard>
+                    }
+                  />
+                  <Route
+                    path="notifications"
+                    element={
+                      <RoleGuard allowed={["super_admin"]}>
+                        <Notifications />
                       </RoleGuard>
                     }
                   />

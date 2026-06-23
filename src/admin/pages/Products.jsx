@@ -4,12 +4,12 @@ import { useAdminAuth } from "../context/AdminAuthContext";
 import "./Products.css";
 
 const CATEGORIES = [
-  "Frames",
-  "Contacts",
-  "Sunglasses",
-  "For Him",
-  "For Her",
-  "For Kids",
+  { id: "frames", label: "Frames" },
+  { id: "contacts", label: "Contact Lenses" },
+  { id: "sunglasses", label: "Sunglasses" },
+  { id: "for-him", label: "For Him" },
+  { id: "for-her", label: "For Her" },
+  { id: "for-kids", label: "For Kids" },
 ];
 const CLOUD_NAME = "dgde8cwjk";
 const UPLOAD_PRESET = "cec_products"; // Create this unsigned preset in Cloudinary dashboard
@@ -76,12 +76,12 @@ function ProductModal({ product, onClose, onSaved }) {
     return e;
   }
 
-  function toggleCat(cat) {
+  function toggleCat(catId) {
     setForm((f) => ({
       ...f,
-      category: f.category.includes(cat)
-        ? f.category.filter((c) => c !== cat)
-        : [...f.category, cat],
+      category: f.category.includes(catId)
+        ? f.category.filter((c) => c !== catId)
+        : [...f.category, catId],
     }));
     if (errors.category) setErrors((p) => ({ ...p, category: "" }));
   }
@@ -258,12 +258,12 @@ function ProductModal({ product, onClose, onSaved }) {
             <div className="prod-cats">
               {CATEGORIES.map((cat) => (
                 <button
-                  key={cat}
+                  key={cat.id}
                   type="button"
-                  className={`prod-cat-btn${form.category.includes(cat) ? " prod-cat-btn--on" : ""}`}
-                  onClick={() => toggleCat(cat)}
+                  className={`prod-cat-btn${form.category.includes(cat.id) ? " prod-cat-btn--on" : ""}`}
+                  onClick={() => toggleCat(cat.id)}
                 >
-                  {cat}
+                  {cat.label}
                 </button>
               ))}
             </div>

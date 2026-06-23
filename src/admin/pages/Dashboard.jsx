@@ -3,6 +3,12 @@ import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import "./Dashboard.css";
 
+const BRANCH_TO_LOCATION = {
+  "Head Office — Bodija": "Royal Mall, Bodija, Ibadan",
+  "Oluyole Branch": "Alaafin Avenue, Oluyole Estate, Ibadan",
+  "New Bodija Branch": "3B Aare Avenue, New Bodija, Ibadan",
+};
+
 function StatCard({ label, value, sub, accent }) {
   return (
     <div className={`dash-card${accent ? " dash-card--accent" : ""}`}>
@@ -38,7 +44,10 @@ export default function Dashboard() {
         .eq("status", "upcoming");
 
       if (!isSuperAdmin && profile?.branch) {
-        todayBase.eq("location", profile.branch);
+        todayBase.eq(
+          "location",
+          BRANCH_TO_LOCATION[profile.branch] || profile.branch,
+        );
       }
 
       const [
