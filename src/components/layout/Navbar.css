@@ -210,7 +210,7 @@
   overflow-y: auto;
   transform: translateX(100%);
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-  padding-top: calc(var(--nav-height) + 48px);
+  padding-top: 0;
 }
 .navbar__mobile.open {
   transform: translateX(0);
