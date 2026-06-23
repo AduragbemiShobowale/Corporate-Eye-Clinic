@@ -1,77 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { shopCategories } from "../data/siteData";
 import { useCart } from "../context/CartContext";
+import { supabase } from "../lib/supabase";
 import PrescriptionGlassesSection from "../components/ui/PrescriptionGlassesSection";
 import ContactLensPrescriptionSection from "../components/ui/ContactLensPrescriptionSection";
+// import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
 import "./ShopPage.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
-
-const products = [
-  {
-    id: 1,
-    name: "Classic Oval Frame",
-    price: 35000,
-    category: ["frames", "for-her"],
-    tag: "Bestseller",
-  },
-  {
-    id: 2,
-    name: "Bold Square Frame",
-    price: 28000,
-    category: ["frames", "for-him"],
-    tag: null,
-  },
-  {
-    id: 3,
-    name: "Kids Flex Frame",
-    price: 18000,
-    category: ["frames", "for-kids"],
-    tag: "New",
-  },
-  {
-    id: 4,
-    name: "Aviator Sunglasses",
-    price: 42000,
-    category: ["sunglasses", "for-him"],
-    tag: null,
-  },
-  {
-    id: 5,
-    name: "Cat-Eye Sunglasses",
-    price: 38000,
-    category: ["sunglasses", "for-her"],
-    tag: "Bestseller",
-  },
-  {
-    id: 6,
-    name: "Daily Contact Lenses (30pk)",
-    price: 22000,
-    category: ["contacts"],
-    tag: null,
-  },
-  {
-    id: 7,
-    name: "Monthly Contact Lenses (6pk)",
-    price: 32000,
-    category: ["contacts"],
-    tag: "25% off first order",
-  },
-  {
-    id: 8,
-    name: "Rimless Reading Glasses",
-    price: 15000,
-    category: ["frames", "for-him", "for-her"],
-    tag: null,
-  },
-  {
-    id: 9,
-    name: "Kids Sunglasses",
-    price: 12000,
-    category: ["sunglasses", "for-kids"],
-    tag: "New",
-  },
-];
 
 function formatNGN(n) {
   return "₦" + n.toLocaleString("en-NG");
@@ -81,10 +17,23 @@ export default function ShopPage() {
   const [active, setActive] = useState("all");
   const { addToCart, items } = useCart();
   const [successName, setSuccessName] = useState(null);
-  const [contactsMode, setContactsMode] = useState("regular"); // 'regular' | 'prescription'
-  const [prescriptionType, setPrescriptionType] = useState("glasses"); // 'glasses' | 'contacts'
+  const [contactsMode, setContactsMode] = useState("regular");
+  const [prescriptionType, setPrescriptionType] = useState("glasses");
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
-  // Reset contacts sub-mode whenever category changes away from contacts
+  // Fetch live products from Supabase on mount
+  useEffect(() => {
+    supabase
+      .from("products")
+      .select("id, name, price, category, tag, stock_qty, discount_percent, image_url")
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        setProducts(data || []);
+        setLoadingProducts(false);
+      });
+  }, []);
+
   const handleCategoryClick = (catId) => {
     setActive(catId);
     if (catId !== "contacts") setContactsMode("regular");
@@ -150,7 +99,6 @@ export default function ShopPage() {
             ))}
           </div>
 
-          {/* ── Contact Lenses: Regular vs Prescription inline switch ── */}
           {active === "contacts" && (
             <div className="shop__mode-switch">
               <button
@@ -168,7 +116,6 @@ export default function ShopPage() {
             </div>
           )}
 
-          {/* ── Prescription tab: Glasses vs Contacts switch ── */}
           {active === "prescription" && (
             <div className="shop__mode-switch">
               <button
@@ -186,7 +133,6 @@ export default function ShopPage() {
             </div>
           )}
 
-          {/* ── Main content area: grid OR prescription form ── */}
           {active === "prescription" ? (
             prescriptionType === "glasses" ? (
               <PrescriptionGlassesSection
@@ -204,29 +150,80 @@ export default function ShopPage() {
               onSuccess={(name) => setSuccessName(name)}
               inline
             />
+          ) : loadingProducts ? (
+            <div className="shop__empty">
+              <p>Loading products…</p>
+            </div>
           ) : filtered.length === 0 ? (
             <div className="shop__empty">
               <p>No products found in this category yet. Check back soon!</p>
             </div>
           ) : (
             <div className="shop__grid">
-              {filtered.map((p) => (
-                <div key={p.id} className="card card--hover shop__card">
-                  <div className="shop__card-img" aria-hidden="true">
-                    <EyeglassIllustration category={p.category[0]} />
+              {filtered.map((p) => {
+                const outOfStock = p.stock_qty === 0;
+                const discountedPrice = p.discount_percent > 0
+                  ? Math.round(p.price * (1 - p.discount_percent / 100))
+                  : null;
+
+                return (
+                  <div
+                    key={p.id}
+                    className={`card card--hover shop__card${outOfStock ? " shop__card--oos" : ""}`}
+                  >
+                    <div className="shop__card-img" aria-hidden="true">
+                      {p.image_url ? (
+                        <img
+                          src={p.image_url}
+                          alt={p.name}
+                          className="shop__card-photo"
+                        />
+                      ) : (
+                        <EyeglassIllustration category={p.category[0]} />
+                      )}
+                      {outOfStock && (
+                        <div className="shop__oos-overlay">
+                          <span>Out of stock</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="shop__card-body">
+                      {p.tag && (
+                        <span className="badge badge--teal shop__tag">
+                          {p.tag}
+                        </span>
+                      )}
+                      <h3 className="shop__card-name">{p.name}</h3>
+                      <div className="shop__card-price-wrap">
+                        {discountedPrice ? (
+                          <>
+                            <p className="shop__card-price shop__card-price--discounted">
+                              {formatNGN(discountedPrice)}
+                            </p>
+                            <p className="shop__card-price--original">
+                              {formatNGN(p.price)}
+                            </p>
+                            <span className="shop__discount-badge">
+                              {p.discount_percent}% off
+                            </span>
+                          </>
+                        ) : (
+                          <p className="shop__card-price">{formatNGN(p.price)}</p>
+                        )}
+                      </div>
+
+                      {/* Stock indicator — only shows when stock is low */}
+                      {!outOfStock && p.stock_qty <= 10 && (
+                        <p className={`shop__stock-label${p.stock_qty <= 3 ? " shop__stock-label--critical" : " shop__stock-label--low"}`}>
+                          {p.stock_qty <= 3 ? "🔴" : "🟡"} Only {p.stock_qty} left{p.stock_qty <= 3 ? " — order soon" : ""}
+                        </p>
+                      )}
+
+                      <AddToCartBtn product={p} disabled={outOfStock} />
+                    </div>
                   </div>
-                  <div className="shop__card-body">
-                    {p.tag && (
-                      <span className="badge badge--teal shop__tag">
-                        {p.tag}
-                      </span>
-                    )}
-                    <h3 className="shop__card-name">{p.name}</h3>
-                    <p className="shop__card-price">{formatNGN(p.price)}</p>
-                    <AddToCartBtn product={p} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -251,7 +248,6 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* ── Small success confirmation modal ── */}
       {successName !== null && (
         <OrderRequestSuccessModal
           name={successName}
@@ -259,16 +255,23 @@ export default function ShopPage() {
         />
       )}
 
-      {/* ── Floating cart bar ── */}
       <FloatingCart />
     </>
   );
 }
 
-function AddToCartBtn({ product }) {
+function AddToCartBtn({ product, disabled }) {
   const { addToCart, items } = useCart();
   const [flash, setFlash] = React.useState(false);
   const inCart = items.find((i) => i.product.id === product.id);
+
+  if (disabled) {
+    return (
+      <button className="btn btn--primary shop__add-btn shop__add-btn--oos" disabled>
+        Out of stock
+      </button>
+    );
+  }
 
   const handleAdd = () => {
     addToCart(product);

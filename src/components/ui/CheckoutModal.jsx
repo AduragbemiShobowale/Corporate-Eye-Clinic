@@ -7,7 +7,7 @@ import "./CheckoutModal.css";
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
 
 // ── Replace with your real Paystack public key ──
-const PAYSTACK_PUBLIC_KEY = "pk_test_e893b29a3a484c94b65ccc01dfbbcbc177726ffe";
+const PAYSTACK_PUBLIC_KEY = "pk_test_1b9fdf16809a6da56ce4f9e59592732352bc8cf7";
 const DELIVERY_FEE = 3500; // ₦3,500 flat fee — added only when Dispatch/Delivery is selected
 
 export default function CheckoutModal({ onClose }) {
@@ -75,6 +75,35 @@ export default function CheckoutModal({ onClose }) {
     const payload = buildOrderPayload(paymentRef);
     const { error } = await supabase.from("shop_orders").insert([payload]);
     if (error) console.error("Order save failed:", error);
+
+    // Decrement stock_qty for each purchased item (loose — runs after payment,
+    // rare overselling accepted per design decision)
+    for (const item of items) {
+      if (!item.options?.isQuote && item.product.id) {
+        try {
+          // Fetch current stock first to avoid going below zero
+          const { data: prod } = await supabase
+            .from("products")
+            .select("stock_qty")
+            .eq("id", item.product.id)
+            .single();
+
+          if (prod && prod.stock_qty > 0) {
+            await supabase
+              .from("products")
+              .update({ stock_qty: Math.max(0, prod.stock_qty - item.qty) })
+              .eq("id", item.product.id);
+          }
+        } catch (e) {
+          console.error(
+            "Stock decrement failed for product",
+            item.product.id,
+            e,
+          );
+          // Never block the success flow — stock sync is best-effort
+        }
+      }
+    }
 
     try {
       await fetch(
