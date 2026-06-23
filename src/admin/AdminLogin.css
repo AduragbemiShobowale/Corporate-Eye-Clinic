@@ -379,3 +379,36 @@
 .al-password-toggle:hover {
   color: var(--gray-500);
 }
+
+/* ── Mobile login ────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .al-page {
+    flex-direction: column;
+  }
+
+  .al-panel {
+    width: 100%;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    min-height: 280px;
+  }
+
+  .al-panel::after {
+    width: 200px;
+    height: 200px;
+  }
+  .al-panel-badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .al-form-panel {
+    padding: var(--space-6) var(--space-5);
+  }
+  .al-form-card {
+    max-width: 100%;
+  }
+  .al-form-title {
+    font-size: var(--font-size-2xl);
+  }
+}

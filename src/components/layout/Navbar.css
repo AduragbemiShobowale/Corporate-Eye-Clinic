@@ -216,6 +216,23 @@
   transform: translateX(0);
 }
 
+.navbar__mobile-close {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding: var(--space-4) var(--space-5) var(--space-2);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.navbar__mobile-close:hover {
+  color: var(--white);
+}
+
 .navbar__mobile-nav {
   display: flex;
   flex-direction: column;

@@ -476,54 +476,16 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   RESPONSIVE — tablet (768px–1023px) and mobile block (<768px)
+   RESPONSIVE — mobile + tablet (<1024px) and desktop (≥1024px)
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Mobile block: shown only below 768px ── */
+/* Mobile block is never shown — admin works on all screen sizes */
 .admin-mobile-block {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: var(--space-8) var(--space-6);
-  background: var(--navy-800);
-  text-align: center;
+  display: none !important;
 }
 
-.admin-mobile-logo {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  margin-bottom: var(--space-5);
-}
-
-.admin-mobile-title {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--white);
-  margin: 0 0 var(--space-4);
-}
-
-.admin-mobile-msg {
-  font-size: var(--font-size-base);
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.7;
-  margin: 0;
-  max-width: 320px;
-}
-
-@media (max-width: 767px) {
-  .admin-mobile-block {
-    display: flex;
-  }
-  .admin-shell {
-    display: none;
-  }
-}
-
-/* ── Tablet: sidebar becomes a slide-in drawer ── */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* ── Mobile + Tablet (<1024px): sidebar is a slide-in drawer ── */
+@media (max-width: 1023px) {
   .admin-shell {
     position: relative;
   }
@@ -538,6 +500,8 @@
     transform: translateX(-100%);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: none;
+    width: 260px;
+    min-width: 260px;
   }
 
   /* Open state — slides in */
@@ -558,10 +522,10 @@
 
   /* Main takes full width since sidebar is off-canvas */
   .admin-main {
-    padding: var(--space-5) var(--space-5) var(--space-8);
+    padding: var(--space-4) var(--space-4) var(--space-8);
   }
 
-  /* Hamburger button — visible on tablet */
+  /* Hamburger button */
   .admin-hamburger {
     display: flex;
     align-items: center;
@@ -573,16 +537,15 @@
     border: 1px solid var(--color-border);
     cursor: pointer;
     color: var(--navy-800);
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
     flex-shrink: 0;
     transition: background 0.12s;
   }
-
   .admin-hamburger:hover {
     background: var(--off-white);
   }
 
-  /* Close button inside sidebar — tablet only */
+  /* Close button inside sidebar */
   .admin-sidebar-close {
     display: flex;
     align-items: center;
@@ -605,18 +568,57 @@
     background: rgba(255, 255, 255, 0.08);
   }
 
-  /* Tables scroll horizontally on tablet */
+  /* Tables scroll horizontally */
   .admin-card {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-
   .admin-table {
-    min-width: 680px;
+    min-width: 620px;
+  }
+
+  /* Page header stacks on small phones */
+  .admin-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  /* Page title smaller on phone */
+  .admin-page-title {
+    font-size: var(--font-size-xl);
+  }
+
+  /* Modal full-width on phones */
+  .admin-modal {
+    max-width: calc(100vw - 32px) !important;
+    padding: var(--space-6) var(--space-5) !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  /* Dashboard stat cards stack nicely */
+  .dash-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* ── Desktop: sidebar always visible, hamburger hidden ── */
+/* ── Extra small phones (<480px): single column stats ── */
+@media (max-width: 479px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-main {
+    padding: var(--space-3) var(--space-3) var(--space-6);
+  }
+  .tp-filters {
+    flex-direction: column;
+  }
+  .tp-filters .admin-select {
+    width: 100%;
+  }
+}
+
+/* ── Desktop (≥1024px): sidebar always visible, hamburger hidden ── */
 @media (min-width: 1024px) {
   .admin-hamburger {
     display: none;
