@@ -26,14 +26,37 @@ function nextStatuses(current, isSuperAdmin) {
   if (!isSuperAdmin && current === "cancellation_pending") return [];
   if (current === "cancelled" || current === "fulfilled") return [];
   const flow = ["pending", "processing", "shipped", "fulfilled"];
-  // Super admin can cancel directly — no need to go through cancellation_pending
   if (isSuperAdmin) return [...flow, "cancelled"];
   return [...flow, "cancellation_pending"];
+}
+
+function EditorStamp({ updatedBy, updatedAt, profileMap }) {
+  if (!updatedBy || !profileMap[updatedBy]) return null;
+  const profile = profileMap[updatedBy];
+  return (
+    <p
+      style={{
+        fontSize: "var(--font-size-xs)",
+        color: "var(--color-text-muted)",
+        margin: "4px 0 0",
+        lineHeight: 1.4,
+      }}
+    >
+      ✏️ {profile.full_name}
+      {profile.branch
+        ? ` · ${profile.branch.replace(" Branch", "").replace(" — Bodija", "")}`
+        : ""}
+      {updatedAt
+        ? ` · ${new Date(updatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
+        : ""}
+    </p>
+  );
 }
 
 export default function ShopOrders() {
   const { isSuperAdmin } = useAdminAuth();
   const [orders, setOrders] = useState([]);
+  const [profileMap, setProfileMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("All");
   const [expanded, setExpanded] = useState(null);
@@ -45,8 +68,16 @@ export default function ShopOrders() {
       .select("*")
       .order("created_at", { ascending: false });
     if (status !== "All") q = q.eq("status", status);
-    const { data } = await q;
+    const [{ data }, { data: profs }] = await Promise.all([
+      q,
+      supabase.from("profiles").select("id, full_name, branch"),
+    ]);
     setOrders(data || []);
+    const map = {};
+    (profs || []).forEach((p) => {
+      map[p.id] = p;
+    });
+    setProfileMap(map);
     setLoading(false);
   }
 
@@ -140,6 +171,11 @@ export default function ShopOrders() {
                       <span className={`admin-badge ${BADGE[o.status] || ""}`}>
                         {o.status?.replace("_", " ")}
                       </span>
+                      <EditorStamp
+                        updatedBy={o.status_updated_by}
+                        updatedAt={o.status_updated_at}
+                        profileMap={profileMap}
+                      />
                     </td>
                     <td>
                       {o.status === "cancellation_pending" && isSuperAdmin ? (
@@ -210,8 +246,10 @@ export default function ShopOrders() {
                             <label>Items ordered</label>
                             {(o.items || []).map((item, i) => (
                               <p key={i}>
-                                {item.name} × {item.quantity} — ₦
-                                {(item.price * item.quantity).toLocaleString()}
+                                {item.name} × {item.qty ?? item.quantity ?? 1}
+                                {item.price
+                                  ? ` — ₦${(item.price * (item.qty ?? item.quantity ?? 1)).toLocaleString()}`
+                                  : " — Quote item"}
                               </p>
                             ))}
                           </div>

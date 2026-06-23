@@ -35,9 +35,33 @@ function RxField({ label, value }) {
   );
 }
 
+function EditorStamp({ updatedBy, updatedAt, profileMap }) {
+  if (!updatedBy || !profileMap[updatedBy]) return null;
+  const profile = profileMap[updatedBy];
+  return (
+    <p
+      style={{
+        fontSize: "var(--font-size-xs)",
+        color: "var(--color-text-muted)",
+        margin: "4px 0 0",
+        lineHeight: 1.4,
+      }}
+    >
+      ✏️ {profile.full_name}
+      {profile.branch
+        ? ` · ${profile.branch.replace(" Branch", "").replace(" — Bodija", "")}`
+        : ""}
+      {updatedAt
+        ? ` · ${new Date(updatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
+        : ""}
+    </p>
+  );
+}
+
 export default function Prescriptions() {
   const { isSuperAdmin } = useAdminAuth();
   const [orders, setOrders] = useState([]);
+  const [profileMap, setProfileMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("All");
   const [type, setType] = useState("All");
@@ -51,8 +75,16 @@ export default function Prescriptions() {
       .order("created_at", { ascending: false });
     if (status !== "All") q = q.eq("status", status);
     if (type !== "All") q = q.eq("order_type", type);
-    const { data } = await q;
+    const [{ data }, { data: profs }] = await Promise.all([
+      q,
+      supabase.from("profiles").select("id, full_name, branch"),
+    ]);
     setOrders(data || []);
+    const map = {};
+    (profs || []).forEach((p) => {
+      map[p.id] = p;
+    });
+    setProfileMap(map);
     setLoading(false);
   }
 
@@ -155,6 +187,11 @@ export default function Prescriptions() {
                       <span className={`admin-badge ${BADGE[o.status] || ""}`}>
                         {o.status?.replace("_", " ")}
                       </span>
+                      <EditorStamp
+                        updatedBy={o.status_updated_by}
+                        updatedAt={o.status_updated_at}
+                        profileMap={profileMap}
+                      />
                     </td>
                     <td>
                       {o.status === "cancellation_pending" && isSuperAdmin ? (
