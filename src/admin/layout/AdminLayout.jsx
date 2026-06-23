@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import { supabase } from "../../lib/supabase";
 import "./AdminLayout.css";
 
 const NAV_ITEMS = [
@@ -73,11 +74,37 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // Fetch pending approvals count for super_admin badge
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    async function fetchCount() {
+      const [{ count: b }, { count: s }, { count: p }] = await Promise.all([
+        supabase
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "cancellation_pending"),
+        supabase
+          .from("shop_orders")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "cancellation_pending"),
+        supabase
+          .from("prescription_orders")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "cancellation_pending"),
+      ]);
+      setPendingCount((b || 0) + (s || 0) + (p || 0));
+    }
+    fetchCount();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchCount, 60000);
+    return () => clearInterval(interval);
+  }, [isSuperAdmin]);
 
   const visibleNav = NAV_ITEMS.filter(
     (item) => profile && item.roles.includes(profile.role),
   );
-
   const initials =
     profile?.full_name
       ?.split(" ")
@@ -94,7 +121,6 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      {/* ── Sidebar ── */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-brand">
           <img
@@ -120,11 +146,13 @@ export default function AdminLayout() {
             >
               <span className="admin-nav-icon">{item.icon}</span>
               <span className="admin-nav-label">{item.label}</span>
+              {item.badge && pendingCount > 0 && (
+                <span className="admin-nav-badge">{pendingCount}</span>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        {/* ── User strip — click anywhere to trigger logout modal ── */}
         <button
           className="admin-sidebar-user"
           onClick={() => setShowConfirm(true)}
@@ -156,12 +184,10 @@ export default function AdminLayout() {
         </button>
       </aside>
 
-      {/* ── Main content ── */}
       <div className="admin-main">
         <Outlet />
       </div>
 
-      {/* ── Logout confirmation modal ── */}
       {showConfirm && (
         <div
           className="admin-modal-backdrop"

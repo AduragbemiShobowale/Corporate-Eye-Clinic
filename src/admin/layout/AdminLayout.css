@@ -90,6 +90,22 @@
 
 .admin-nav-label {
   line-height: 1.3;
+  flex: 1;
+}
+
+.admin-nav-badge {
+  min-width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--teal-700);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
 }
 
 /* ── User strip ──────────────────────────────────────────────────── */

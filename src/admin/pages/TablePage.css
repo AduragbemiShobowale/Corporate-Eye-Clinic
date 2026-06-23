@@ -1,0 +1,60 @@
+.tp-filters {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.tp-action-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tp-sm-btn {
+  padding: var(--space-1) var(--space-3) !important;
+  font-size: var(--font-size-xs) !important;
+}
+
+.tp-status-select {
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-2);
+}
+
+.tp-expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  padding: 0;
+  text-decoration: underline;
+}
+
+.tp-expand-btn:hover { color: var(--navy-800); }
+
+.tp-expanded-row td {
+  background: var(--off-white) !important;
+  padding: var(--space-4) var(--space-4) !important;
+}
+
+.tp-expanded-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3) var(--space-6);
+}
+
+.tp-expanded-field label {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.tp-expanded-field p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin: 0;
+}

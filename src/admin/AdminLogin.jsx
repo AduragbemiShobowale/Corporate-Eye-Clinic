@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAdminAuth } from "./context/AdminAuthContext";
 import "./AdminLogin.css";
 
@@ -21,16 +21,12 @@ export default function AdminLogin() {
 
   function validate() {
     const e = {};
-    if (!email.trim()) {
-      e.email = "Email address is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    if (!email.trim()) e.email = "Email address is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       e.email = "Please enter a valid email address.";
-    }
-    if (!password) {
-      e.password = "Password is required.";
-    } else if (password.length < 6) {
+    if (!password) e.password = "Password is required.";
+    else if (password.length < 6)
       e.password = "Password must be at least 6 characters.";
-    }
     return e;
   }
 
@@ -54,28 +50,20 @@ export default function AdminLogin() {
     }
   }
 
-  function handleEmailChange(e) {
-    setEmail(e.target.value);
-    if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
-  }
-
-  function handlePasswordChange(e) {
-    setPassword(e.target.value);
-    if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
-  }
-
   return (
     <div className="al-page">
-      {/* Left decorative panel */}
       <div className="al-panel">
         <div className="al-panel-overlay" />
         <div className="al-panel-content">
           <div className="al-panel-logo-wrap">
-            <img
-              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
-              alt="Corporate Eye Clinic"
-              className="al-panel-logo"
-            />
+            {/* Logo links back to public homepage */}
+            <Link to="/">
+              <img
+                src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+                alt="Go to Corporate Eye Clinic homepage"
+                className="al-panel-logo"
+              />
+            </Link>
           </div>
           <h1 className="al-panel-name">Corporate Eye Clinic</h1>
           <p className="al-panel-tagline">
@@ -90,7 +78,6 @@ export default function AdminLogin() {
         </div>
       </div>
 
-      {/* Right form panel */}
       <div className="al-form-panel">
         <div className="al-form-card">
           <div className="al-form-header">
@@ -102,7 +89,6 @@ export default function AdminLogin() {
           </div>
 
           <form className="al-form" onSubmit={handleSubmit} noValidate>
-            {/* Email */}
             <div className="al-field">
               <label className="al-label" htmlFor="email">
                 Email address
@@ -112,7 +98,10 @@ export default function AdminLogin() {
                 type="email"
                 className={`al-input${errors.email ? " al-input--error" : ""}`}
                 value={email}
-                onChange={handleEmailChange}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors((p) => ({ ...p, email: "" }));
+                }}
                 placeholder="you@corporateeyeclinic.com"
                 autoComplete="email"
               />
@@ -121,7 +110,6 @@ export default function AdminLogin() {
               )}
             </div>
 
-            {/* Password */}
             <div className="al-field">
               <label className="al-label" htmlFor="password">
                 Password
@@ -132,7 +120,11 @@ export default function AdminLogin() {
                   type={showPassword ? "text" : "password"}
                   className={`al-input al-input--padded-right${errors.password ? " al-input--error" : ""}`}
                   value={password}
-                  onChange={handlePasswordChange}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password)
+                      setErrors((p) => ({ ...p, password: "" }));
+                  }}
                   placeholder="••••••••"
                   autoComplete="current-password"
                 />
@@ -144,7 +136,6 @@ export default function AdminLogin() {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    // Eye-off icon
                     <svg
                       width="18"
                       height="18"
@@ -160,7 +151,6 @@ export default function AdminLogin() {
                       <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   ) : (
-                    // Eye icon
                     <svg
                       width="18"
                       height="18"
