@@ -26,7 +26,9 @@ export default function ShopPage() {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id, name, price, category, tag, stock_qty, discount_percent, image_url")
+      .select(
+        "id, name, price, category, tag, stock_qty, discount_percent, image_url",
+      )
       .order("created_at", { ascending: true })
       .then(({ data }) => {
         setProducts(data || []);
@@ -162,9 +164,10 @@ export default function ShopPage() {
             <div className="shop__grid">
               {filtered.map((p) => {
                 const outOfStock = p.stock_qty === 0;
-                const discountedPrice = p.discount_percent > 0
-                  ? Math.round(p.price * (1 - p.discount_percent / 100))
-                  : null;
+                const discountedPrice =
+                  p.discount_percent > 0
+                    ? Math.round(p.price * (1 - p.discount_percent / 100))
+                    : null;
 
                 return (
                   <div
@@ -208,14 +211,33 @@ export default function ShopPage() {
                             </span>
                           </>
                         ) : (
-                          <p className="shop__card-price">{formatNGN(p.price)}</p>
+                          <p className="shop__card-price">
+                            {formatNGN(p.price)}
+                          </p>
                         )}
                       </div>
 
-                      {/* Stock indicator — only shows when stock is low */}
-                      {!outOfStock && p.stock_qty <= 10 && (
-                        <p className={`shop__stock-label${p.stock_qty <= 3 ? " shop__stock-label--critical" : " shop__stock-label--low"}`}>
-                          {p.stock_qty <= 3 ? "🔴" : "🟡"} Only {p.stock_qty} left{p.stock_qty <= 3 ? " — order soon" : ""}
+                      {/* Stock indicator — always shown */}
+                      {!outOfStock && (
+                        <p
+                          className={`shop__stock-label${
+                            p.stock_qty <= 3
+                              ? " shop__stock-label--critical"
+                              : p.stock_qty <= 10
+                                ? " shop__stock-label--low"
+                                : " shop__stock-label--ok"
+                          }`}
+                        >
+                          {p.stock_qty <= 3
+                            ? "🔴"
+                            : p.stock_qty <= 10
+                              ? "🟡"
+                              : "🟢"}{" "}
+                          {p.stock_qty <= 3
+                            ? `Only ${p.stock_qty} left — order soon`
+                            : p.stock_qty <= 10
+                              ? `Only ${p.stock_qty} left`
+                              : `${p.stock_qty} in stock`}
                         </p>
                       )}
 
@@ -267,7 +289,10 @@ function AddToCartBtn({ product, disabled }) {
 
   if (disabled) {
     return (
-      <button className="btn btn--primary shop__add-btn shop__add-btn--oos" disabled>
+      <button
+        className="btn btn--primary shop__add-btn shop__add-btn--oos"
+        disabled
+      >
         Out of stock
       </button>
     );

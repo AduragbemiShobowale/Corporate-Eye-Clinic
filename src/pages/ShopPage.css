@@ -614,6 +614,10 @@
   gap: 4px;
 }
 
+.shop__stock-label--ok {
+  color: #166534;
+}
+
 .shop__stock-label--low {
   color: #92600a;
 }
