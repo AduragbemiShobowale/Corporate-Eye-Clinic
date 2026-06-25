@@ -7,22 +7,130 @@ const STATUSES = [
   "All",
   "pending",
   "ready",
+  "collected",
   "cancellation_pending",
   "cancelled",
 ];
 const BADGE = {
   pending: "admin-badge--pending",
   ready: "admin-badge--ready",
+  collected: "admin-badge--fulfilled",
   cancellation_pending: "admin-badge--cancellation_pending",
   cancelled: "admin-badge--cancelled",
 };
 
+const PAYMENT_METHODS = ["cash", "pos", "transfer"];
+const PAYMENT_LABEL = { cash: "Cash", pos: "POS", transfer: "Transfer" };
+
 function nextStatuses(current, isSuperAdmin) {
   if (isSuperAdmin && current === "cancellation_pending") return ["cancelled"];
   if (!isSuperAdmin && current === "cancellation_pending") return [];
-  if (current === "cancelled" || current === "ready") return [];
+  if (current === "cancelled" || current === "collected") return [];
+  // "ready" → collect via pickup modal, not status dropdown
+  if (current === "ready")
+    return isSuperAdmin ? ["cancelled"] : ["cancellation_pending"];
   if (isSuperAdmin) return ["ready", "cancelled"];
   return ["ready", "cancellation_pending"];
+}
+
+// ── Pickup modal — records collection + payment method ────────────
+function PickupModal({ order, onClose, onSaved }) {
+  const [payMethod, setPayMethod] = useState("cash");
+  const [saving, setSaving] = useState(false);
+
+  async function handleCollect() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("prescription_orders")
+      .update({ status: "collected", payment_method: payMethod })
+      .eq("id", order.id);
+    setSaving(false);
+    if (error) {
+      alert("Error: " + error.message);
+      return;
+    }
+    onSaved();
+  }
+
+  return (
+    <div className="admin-modal-backdrop" onClick={onClose}>
+      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="admin-modal-icon-wrap"
+          style={{ background: "var(--teal-50)", color: "var(--teal-700)" }}
+        >
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h2 className="admin-modal-title">Record collection</h2>
+        <p className="admin-modal-body">
+          <strong>{order.name}</strong> — {order.order_type} prescription
+          <br />
+          Select the payment method used at pickup.
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-3)",
+            marginBottom: "var(--space-6)",
+          }}
+        >
+          {PAYMENT_METHODS.map((m) => (
+            <button
+              key={m}
+              type="button"
+              style={{
+                flex: 1,
+                padding: "var(--space-3)",
+                border: `2px solid ${payMethod === m ? "var(--navy-800)" : "var(--color-border)"}`,
+                borderRadius: "var(--radius-md)",
+                background:
+                  payMethod === m ? "var(--navy-800)" : "var(--white)",
+                color:
+                  payMethod === m ? "var(--white)" : "var(--color-text-muted)",
+                fontFamily: "var(--font-sans)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-sm)",
+                cursor: "pointer",
+                transition: "all 0.12s",
+              }}
+              onClick={() => setPayMethod(m)}
+            >
+              {PAYMENT_LABEL[m]}
+            </button>
+          ))}
+        </div>
+
+        <div className="admin-modal-actions">
+          <button
+            className="admin-btn admin-btn--ghost"
+            onClick={onClose}
+            disabled={saving}
+          >
+            Cancel
+          </button>
+          <button
+            className="admin-btn admin-btn--primary"
+            onClick={handleCollect}
+            disabled={saving}
+          >
+            {saving ? "Recording…" : "Mark as collected"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function RxField({ label, value }) {
@@ -67,6 +175,7 @@ export default function Prescriptions() {
   const [type, setType] = useState("All");
   const [expanded, setExpanded] = useState(null);
   const [updating, setUpdating] = useState(null);
+  const [pickupOrder, setPickupOrder] = useState(null);
 
   async function load() {
     let q = supabase
@@ -216,6 +325,13 @@ export default function Prescriptions() {
                             Decline
                           </button>
                         </div>
+                      ) : o.status === "ready" ? (
+                        <button
+                          className="admin-btn admin-btn--primary tp-sm-btn"
+                          onClick={() => setPickupOrder(o)}
+                        >
+                          Record pickup
+                        </button>
                       ) : options.length > 0 ? (
                         <select
                           className="admin-select tp-status-select"
@@ -313,6 +429,15 @@ export default function Prescriptions() {
                           {o.location && (
                             <RxField label="Pickup branch" value={o.location} />
                           )}
+                          {o.payment_method && (
+                            <RxField
+                              label="Payment method"
+                              value={
+                                PAYMENT_LABEL[o.payment_method] ||
+                                o.payment_method
+                              }
+                            />
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -323,6 +448,17 @@ export default function Prescriptions() {
           </table>
         )}
       </div>
+
+      {pickupOrder && (
+        <PickupModal
+          order={pickupOrder}
+          onClose={() => setPickupOrder(null)}
+          onSaved={() => {
+            setPickupOrder(null);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }

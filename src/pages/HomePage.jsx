@@ -103,7 +103,7 @@ export default function HomePage() {
 function HeroSection({ onBook }) {
   return (
     <section className="hero">
-      {/* Real photo background — corporate feel */}
+      {/* Background photo */}
       <div className="hero__photo-bg" aria-hidden="true">
         <img
           src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1600&q=85"
@@ -112,39 +112,62 @@ function HeroSection({ onBook }) {
       </div>
       <div className="hero__photo-overlay" aria-hidden="true" />
       <div className="hero__gradient" aria-hidden="true" />
-      <div className="hero__grid-pattern" aria-hidden="true" />
+
+      {/* ── Gold aurora sweep ── */}
+      <div className="hero__aurora" aria-hidden="true" />
+      <div className="hero__aurora-2" aria-hidden="true" />
+
+      {/* ── Light beams ── */}
+      <div className="hero__beam hero__beam--1" aria-hidden="true" />
+      <div className="hero__beam hero__beam--2" aria-hidden="true" />
+      <div className="hero__beam hero__beam--3" aria-hidden="true" />
+
+      {/* ── Floating gold particles ── */}
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          className={`hero__particle hero__particle--${i + 1}`}
+          aria-hidden="true"
+        />
+      ))}
+
+      {/* ── Decorative rings ── */}
+      <div className="hero__ring hero__ring--1" aria-hidden="true" />
+      <div className="hero__ring hero__ring--2" aria-hidden="true" />
+      <div className="hero__ring hero__ring--3" aria-hidden="true" />
+
+      {/* ── Ambient orbs ── */}
       <div className="hero__orb hero__orb--1" aria-hidden="true" />
       <div className="hero__orb hero__orb--2" aria-hidden="true" />
       <div className="hero__orb hero__orb--3" aria-hidden="true" />
+
       <div className="container hero__inner">
         <div className="hero__content">
-          <span className="badge badge--white hero__badge">
-            <ShieldIcon /> Serving Ibadan since 2001
-          </span>
-          <h1 className="hero__title">
-            Affordable eye care —{" "}
-            <span className="hero__title-highlight">
-              without compromise
-              <svg
-                className="hero__title-underline"
-                viewBox="0 0 300 12"
-                aria-hidden="true"
-              >
-                <path
-                  d="M2 9C50 3 100 1 150 6C200 11 250 9 298 5"
-                  stroke="var(--amber-400)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              </svg>
-            </span>
-          </h1>
-          <p className="hero__subtitle">
-            Corporate Eye Clinic offers comprehensive, computerised eye care for
-            individuals, families, schools, and organisations across Ibadan and
-            the south-west.
+          {/* Logo */}
+          <div className="hero__logo-wrap" aria-hidden="true">
+            <div className="hero__logo-ring" />
+            <div className="hero__logo-glow" />
+            <img
+              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              alt="Corporate Eye Clinic"
+              className="hero__logo"
+            />
+          </div>
+
+          <h1 className="hero__clinic-name">Corporate Eye Clinic</h1>
+
+          <p className="hero__motto">
+            Caring for your vision, one patient at a time.
           </p>
+
+          <div className="hero__divider" aria-hidden="true" />
+
+          <div className="hero__badges">
+            <span className="hero__badge-pill">🏥 3 Branches · Ibadan</span>
+            <span className="hero__badge-pill">👁 Expert Optometry</span>
+            <span className="hero__badge-pill">✦ Serving since 2001</span>
+          </div>
+
           <div className="hero__btns">
             <button
               className="btn btn--white btn--lg hero__btn-primary"
@@ -156,52 +179,6 @@ function HeroSection({ onBook }) {
               Our services
             </Link>
           </div>
-        </div>
-
-        <div className="hero__visual" aria-hidden="true">
-          <div className="hero__eye-wrap">
-            <div className="hero__orbit hero__orbit--1">
-              <div className="hero__orbit-dot" />
-            </div>
-            <div className="hero__orbit hero__orbit--2">
-              <div className="hero__orbit-dot hero__orbit-dot--2" />
-            </div>
-            <div className="hero__eye-container">
-              <EyeIllustration />
-            </div>
-            <div className="hero__float-card hero__float-card--1">
-              <span className="hero__float-icon">
-                <CheckCircleIcon />
-              </span>
-              <div>
-                <div className="hero__float-title">Computerised</div>
-                <div className="hero__float-sub">Eye Exams</div>
-              </div>
-            </div>
-            <div className="hero__float-card hero__float-card--2">
-              <span className="hero__float-icon hero__float-icon--amber">
-                <StarIcon />
-              </span>
-              <div>
-                <div className="hero__float-title">5-Star</div>
-                <div className="hero__float-sub">Patient Ratings</div>
-              </div>
-            </div>
-            <div className="hero__float-card hero__float-card--3">
-              <span className="hero__float-icon">
-                <LocationIcon />
-              </span>
-              <div>
-                <div className="hero__float-title">3 Clinics</div>
-                <div className="hero__float-sub">Across Ibadan</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="hero__scroll-hint" aria-hidden="true">
-        <div className="hero__scroll-mouse">
-          <div className="hero__scroll-wheel" />
         </div>
       </div>
     </section>
