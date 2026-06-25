@@ -72,7 +72,7 @@ export default function ShopPage() {
       </div>
 
       {/* ── Promo bar ── */}
-      <div className="shop-promo">
+      {/* <div className="shop-promo">
         <div className="container shop-promo__inner">
           <span className="badge badge--amber">Limited offer</span>
           <span className="shop-promo__text">
@@ -80,7 +80,7 @@ export default function ShopPage() {
             <code>FIRSTLENS</code> at checkout.
           </span>
         </div>
-      </div>
+      </div> */}
 
       <section className="section">
         <div className="container">
