@@ -108,26 +108,21 @@ export default function ContactLensPrescriptionSection({ onSuccess, inline }) {
         .insert([payload]);
       if (error) throw error;
 
-      // Email is best-effort — never block the success state if this fails
-      try {
-        await fetch(
-          "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-prescription-email",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg",
-            },
-            body: JSON.stringify(payload),
+      // Email notification — fire and forget, never block success state
+      fetch(
+        "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-prescription-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg",
           },
-        );
-      } catch (emailErr) {
-        console.error(
-          "Contact lens email notification failed (order still saved):",
-          emailErr,
-        );
-      }
+          body: JSON.stringify(payload),
+        },
+      ).catch((err) =>
+        console.error("Contact lens email failed (non-blocking):", err),
+      );
 
       onSuccess(form.name);
       setForm({
