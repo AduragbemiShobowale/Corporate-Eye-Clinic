@@ -26,11 +26,6 @@ export default function ServicesPage() {
 
   return (
     <>
-      <SEO
-        title="Eye Care Services"
-        description="Comprehensive eye care services in Ibadan — eye examinations, contact lens fitting, glaucoma management, pediatric eye care, vision therapy, and industrial screening. Book online."
-        canonical="/services"
-      />
       {/* ── Photo Hero ── */}
       <div className="page-hero">
         <div className="page-hero__photo" aria-hidden="true">

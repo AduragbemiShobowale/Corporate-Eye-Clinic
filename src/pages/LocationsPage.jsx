@@ -4,11 +4,6 @@ import "./LocationsPage.css";
 export default function LocationsPage() {
   return (
     <div className="locations-soon">
-      <SEO
-        title="Our Locations — 3 Branches Across Ibadan"
-        description="Visit Corporate Eye Clinic at any of our 3 branches in Ibadan — Head Office Bodija (Royal Mall), Oluyole Estate, and New Bodija. Get directions and contact details."
-        canonical="/locations"
-      />
       <div className="locations-soon__bg" aria-hidden="true">
         <div className="locations-soon__blob locations-soon__blob--1" />
         <div className="locations-soon__blob locations-soon__blob--2" />

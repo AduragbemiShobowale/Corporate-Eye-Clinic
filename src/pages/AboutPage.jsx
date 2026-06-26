@@ -9,11 +9,6 @@ export default function AboutPage() {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <SEO
-        title="About Us"
-        description="Learn about Corporate Eye Clinic — Ibadan's leading optometry practice. Serving patients across Bodija, Oluyole, and New Bodija since 2001 with computerised eye care."
-        canonical="/about"
-      />
       {/* ── Photo Hero (Eye Foundation style) ── */}
       <div className="page-hero about-page-hero">
         <div className="page-hero__photo" aria-hidden="true">
