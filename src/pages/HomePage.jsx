@@ -164,20 +164,20 @@ function HeroSection({ onBook }) {
 
           <div className="hero__badges">
             <span className="hero__badge-pill">🏥 3 Branches · Ibadan</span>
-            <span className="hero__badge-pill">👁 Expert Optometry</span>
+            <span className="hero__badge-pill">👁 Eye Care</span>
             <span className="hero__badge-pill">✦ Serving since 2001</span>
           </div>
 
           <div className="hero__btns">
+            <Link to="/services" className="btn btn--outline-white btn--lg">
+              Our services
+            </Link>
             <button
               className="btn btn--white btn--lg hero__btn-primary"
               onClick={onBook}
             >
               Book an eye exam <ArrowRight />
             </button>
-            <Link to="/services" className="btn btn--outline-white btn--lg">
-              Our services
-            </Link>
           </div>
         </div>
       </div>

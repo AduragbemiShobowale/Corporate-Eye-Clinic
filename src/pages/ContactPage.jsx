@@ -122,6 +122,11 @@ export default function ContactPage() {
 
   return (
     <>
+      <SEO
+        title="Contact Us"
+        description="Get in touch with Corporate Eye Clinic Ibadan. Call us, send a message, or visit any of our 3 branches — Head Office Bodija, Oluyole, or New Bodija. Book online 24/7."
+        canonical="/contact"
+      />
       {/* ── Hero ── */}
       <div className="contact-hero">
         {/* Photo background */}

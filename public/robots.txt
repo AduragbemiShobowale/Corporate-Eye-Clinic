@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Block admin portal from indexing
+Disallow: /admin/
+
+Sitemap: https://www.corporateeyeclinic.com/sitemap.xml
