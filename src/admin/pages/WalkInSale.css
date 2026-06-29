@@ -144,9 +144,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
-.wis-cart-item {
+/* wis-cart-row is what the JSX uses */
+.wis-cart-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -158,20 +160,18 @@
 
 .wis-cart-name {
   flex: 1;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--navy-800);
+  min-width: 0;
 }
-.wis-cart-price {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  white-space: nowrap;
+.wis-cart-name p {
+  margin: 0;
 }
 
-.wis-qty-controls {
+/* wis-qty-ctrl is what the JSX uses */
+.wis-qty-ctrl {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .wis-qty-btn {
@@ -188,6 +188,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.1s;
+  flex-shrink: 0;
 }
 .wis-qty-btn:hover {
   background: var(--off-white);
@@ -204,14 +205,19 @@
 .wis-remove {
   background: none;
   border: none;
-  color: var(--teal-700);
-  font-size: 16px;
+  color: var(--color-text-muted);
+  font-size: 14px;
   cursor: pointer;
   padding: var(--space-1);
   border-radius: var(--radius-sm);
-  transition: background 0.1s;
+  transition:
+    color 0.1s,
+    background 0.1s;
+  flex-shrink: 0;
+  line-height: 1;
 }
 .wis-remove:hover {
+  color: var(--teal-700);
   background: var(--teal-50);
 }
 
@@ -219,11 +225,12 @@
 .wis-pay-row {
   display: flex;
   gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .wis-pay-btn {
   flex: 1;
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-2);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--white);
@@ -233,7 +240,10 @@
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all 0.12s;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .wis-pay-btn--on {
@@ -242,22 +252,25 @@
   color: var(--white);
 }
 
-/* Total */
-.wis-total {
+/* wis-total-row and wis-total-val are what the JSX uses */
+.wis-total-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   background: var(--navy-800);
   border-radius: var(--radius-md);
-  color: var(--white);
+  margin-top: var(--space-1);
 }
 
-.wis-total-label {
+.wis-total-row span:first-child {
   font-size: var(--font-size-sm);
-  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
-.wis-total-amount {
-  font-size: var(--font-size-xl);
+
+.wis-total-val {
+  font-size: var(--font-size-lg);
   font-weight: 700;
+  color: var(--white);
 }
