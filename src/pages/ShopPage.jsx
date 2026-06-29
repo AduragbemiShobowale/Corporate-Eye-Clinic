@@ -206,7 +206,8 @@ export default function ShopPage() {
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
 
-  useEffect(() => {
+  const fetchProducts = useCallback(() => {
+    setLoadingProducts(true);
     supabase
       .from("products")
       .select(
@@ -218,6 +219,17 @@ export default function ShopPage() {
         setLoadingProducts(false);
       });
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Refetch products after any successful checkout so stock changes are reflected
+  useEffect(() => {
+    const handler = () => fetchProducts();
+    window.addEventListener("cec:checkout-success", handler);
+    return () => window.removeEventListener("cec:checkout-success", handler);
+  }, [fetchProducts]);
 
   const handleCategoryClick = (catId) => {
     setActive(catId);
@@ -407,6 +419,10 @@ export default function ShopPage() {
               <div className="shop__grid">
                 {paginated.map((p) => {
                   const outOfStock = p.stock_qty === 0;
+                  const inCart = items.find((i) => i.product.id === p.id);
+                  const cartQty = inCart?.qty ?? 0;
+                  const allInCart =
+                    cartQty >= (p.stock_qty ?? Infinity) && !outOfStock;
                   const discountedPrice =
                     p.discount_percent > 0
                       ? Math.round(p.price * (1 - p.discount_percent / 100))
@@ -415,7 +431,7 @@ export default function ShopPage() {
                   return (
                     <div
                       key={p.id}
-                      className={`card card--hover shop__card${outOfStock ? " shop__card--oos" : ""}`}
+                      className={`card card--hover shop__card${outOfStock ? " shop__card--oos" : ""}${allInCart ? " shop__card--all-in-cart" : ""}`}
                     >
                       <div className="shop__card-img" aria-hidden="true">
                         {p.image_url ? (
@@ -593,7 +609,7 @@ function AddToCartBtn({ product, disabled }) {
         className="btn btn--primary shop__add-btn shop__add-btn--oos"
         disabled
       >
-        Max stock in cart
+        ✓ All stock in your cart
       </button>
     );
   }

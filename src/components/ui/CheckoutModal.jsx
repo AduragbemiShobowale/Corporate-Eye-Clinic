@@ -133,6 +133,8 @@ export default function CheckoutModal({ onClose }) {
     await saveOrderAndNotify(null);
     clearCart();
     setStep("success");
+    // Notify ShopPage to refetch products since stock has changed
+    window.dispatchEvent(new CustomEvent("cec:checkout-success"));
   };
 
   const initPaystack = () => {
@@ -187,12 +189,13 @@ export default function CheckoutModal({ onClose }) {
             .then(() => {
               clearCart();
               setStep("success");
+              window.dispatchEvent(new CustomEvent("cec:checkout-success"));
             })
             .catch((err) => {
               console.error("Post-payment save failed:", err);
-              // Payment already succeeded — still show success to the customer
               clearCart();
               setStep("success");
+              window.dispatchEvent(new CustomEvent("cec:checkout-success"));
             });
         },
         onClose: () => setStep("form"),
