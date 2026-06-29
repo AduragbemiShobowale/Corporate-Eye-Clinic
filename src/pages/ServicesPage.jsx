@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
 import PrescriptionGlassesSection from "../components/ui/PrescriptionGlassesSection";
 import ContactLensPrescriptionSection from "../components/ui/ContactLensPrescriptionSection";
-import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
+// import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
 import "./ShopPage.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
