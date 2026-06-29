@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { useAdminAuth } from "./admin/context/AdminAuthContext";
 
 // Redirects to the correct landing page based on role
@@ -51,6 +52,26 @@ import Notifications from "./admin/pages/Notifications";
 export default function App() {
   return (
     <Router>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            fontFamily: "var(--font-sans, Inter, sans-serif)",
+            fontSize: "14px",
+            borderRadius: "10px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          },
+          success: {
+            iconTheme: { primary: "#1a7a4a", secondary: "#fff" },
+            style: { border: "1px solid #e6f9f0", background: "#fff" },
+          },
+          error: {
+            iconTheme: { primary: "#9B2D1F", secondary: "#fff" },
+            style: { border: "1px solid #fde8e4", background: "#fff" },
+          },
+        }}
+      />
       <ScrollToTop />
       <Routes>
         {/* ── Admin portal — must come first so /admin/* is matched

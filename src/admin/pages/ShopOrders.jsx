@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
@@ -171,7 +172,7 @@ function WalkInSaleModal({ onClose, onSaved }) {
 
     if (error) {
       setSaving(false);
-      alert("Error: " + error.message);
+      toast.error(error?.message || "Something went wrong");
       return;
     }
 
@@ -484,7 +485,7 @@ export default function ShopOrders() {
       .from("shop_orders")
       .update({ status: newStatus })
       .eq("id", order.id);
-    if (error) alert("Error: " + error.message);
+    if (error) toast.error(error?.message || "Something went wrong");
     setUpdating(null);
     load();
   }

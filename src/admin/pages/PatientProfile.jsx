@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
@@ -110,7 +111,7 @@ export default function PatientProfile() {
     const { error } = await supabase.from("patient_records").insert([payload]);
     setSaving(false);
     if (error) {
-      alert("Error saving entry: " + error.message);
+      toast.error(error?.message || "Could not save entry");
       return;
     }
     setEntry({ ...EMPTY_ENTRY });

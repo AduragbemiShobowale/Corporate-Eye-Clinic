@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
@@ -155,7 +156,7 @@ function WalkInModal({ onClose, onSaved }) {
     const { error } = await supabase.from("bookings").insert([payload]);
     setSaving(false);
     if (error) {
-      alert("Error saving booking: " + error.message);
+      toast.error(error?.message || "Could not save booking");
       return;
     }
     onSaved();
@@ -411,7 +412,7 @@ export default function Bookings() {
       .from("bookings")
       .update({ status: newStatus })
       .eq("id", booking.id);
-    if (error) alert("Error: " + error.message);
+    if (error) toast.error(error?.message || "Something went wrong");
     setUpdating(null);
     load(page);
   }

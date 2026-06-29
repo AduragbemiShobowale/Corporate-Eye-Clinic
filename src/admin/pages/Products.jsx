@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import "./Products.css";
@@ -12,7 +13,7 @@ const CATEGORIES = [
   { id: "for-kids", label: "For Kids" },
 ];
 const CLOUD_NAME = "a7n4qcvi";
-const UPLOAD_PRESET = "cec_products"; // Create this unsigned preset in Cloudinary dashboard
+const UPLOAD_PRESET = "cec_products";
 
 async function uploadToCloudinary(file) {
   const form = new FormData();
@@ -26,7 +27,14 @@ async function uploadToCloudinary(file) {
     },
   );
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
+  if (data.error) {
+    if (data.error.message?.toLowerCase().includes("preset")) {
+      throw new Error(
+        "Upload preset 'cec_products' not found. Go to Cloudinary → Settings → Upload → Upload presets → create unsigned preset named 'cec_products'.",
+      );
+    }
+    throw new Error("Image upload failed: " + data.error.message);
+  }
   return data.secure_url;
 }
 
@@ -125,9 +133,10 @@ function ProductModal({ product, onClose, onSaved }) {
               },
             ]);
       if (error) throw error;
+      toast.success(product ? "Product updated." : "Product added.");
       onSaved();
     } catch (err) {
-      alert("Error saving product: " + err.message);
+      toast.error(err.message);
     } finally {
       setSaving(false);
     }

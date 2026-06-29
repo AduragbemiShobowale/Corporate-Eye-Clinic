@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
@@ -47,7 +48,7 @@ function PickupModal({ order, onClose, onSaved }) {
       .eq("id", order.id);
 
     if (statusError) {
-      alert("Error: " + statusError.message);
+      toast.error(statusError?.message || "Something went wrong");
       setSaving(false);
       return;
     }
@@ -217,7 +218,7 @@ export default function Prescriptions() {
       .from("prescription_orders")
       .update({ status: newStatus })
       .eq("id", order.id);
-    if (error) alert("Error: " + error.message);
+    if (error) toast.error(error?.message || "Something went wrong");
     setUpdating(null);
     load();
   }

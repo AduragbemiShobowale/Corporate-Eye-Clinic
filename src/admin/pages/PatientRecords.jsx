@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -87,7 +88,7 @@ export default function PatientRecords() {
       .single();
     setSaving(false);
     if (error) {
-      alert("Error: " + error.message);
+      toast.error(error?.message || "Something went wrong");
       return;
     }
     setShowNew(false);
