@@ -572,6 +572,9 @@ function AddToCartBtn({ product, disabled }) {
   const { addToCart, items } = useCart();
   const [flash, setFlash] = React.useState(false);
   const inCart = items.find((i) => i.product.id === product.id);
+  const cartQty = inCart?.qty ?? 0;
+  const maxStock = product.stock_qty ?? Infinity;
+  const atMax = cartQty >= maxStock;
 
   if (disabled) {
     return (
@@ -580,6 +583,17 @@ function AddToCartBtn({ product, disabled }) {
         disabled
       >
         Out of stock
+      </button>
+    );
+  }
+
+  if (atMax) {
+    return (
+      <button
+        className="btn btn--primary shop__add-btn shop__add-btn--oos"
+        disabled
+      >
+        Max stock in cart
       </button>
     );
   }

@@ -87,10 +87,28 @@ export default function CartDrawer() {
                         className="cart-item__qty-btn"
                         onClick={() => updateQty(key, qty + 1)}
                         aria-label="Increase quantity"
+                        disabled={qty >= (product.stock_qty ?? Infinity)}
+                        style={
+                          qty >= (product.stock_qty ?? Infinity)
+                            ? { opacity: 0.35, cursor: "not-allowed" }
+                            : {}
+                        }
                       >
                         +
                       </button>
                     </div>
+                    {qty >= (product.stock_qty ?? Infinity) && (
+                      <p
+                        style={{
+                          fontSize: "11px",
+                          color: "#9B2D1F",
+                          margin: "4px 0 0",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Max stock reached
+                      </p>
+                    )}
                   </div>
                   <div className="cart-item__right">
                     <p className="cart-item__subtotal">
