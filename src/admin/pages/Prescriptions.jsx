@@ -40,15 +40,25 @@ function PickupModal({ order, onClose, onSaved }) {
 
   async function handleCollect() {
     setSaving(true);
-    const { error } = await supabase
+    // Update status first (trigger allows this)
+    const { error: statusError } = await supabase
       .from("prescription_orders")
-      .update({ status: "collected", payment_method: payMethod })
+      .update({ status: "collected" })
       .eq("id", order.id);
-    setSaving(false);
-    if (error) {
-      alert("Error: " + error.message);
+
+    if (statusError) {
+      alert("Error: " + statusError.message);
+      setSaving(false);
       return;
     }
+
+    // Then update payment_method separately
+    await supabase
+      .from("prescription_orders")
+      .update({ payment_method: payMethod })
+      .eq("id", order.id);
+
+    setSaving(false);
     onSaved();
   }
 

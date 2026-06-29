@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="footer__brand">
           <Link to="/" className="footer__logo">
             <img
-              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              src="https://res.cloudinary.com/a7n4qcvi/image/upload/v1782668966/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_f68v8c.png"
               alt="Corporate Eye Clinic"
               className="footer__logo-img"
             />
@@ -109,10 +109,12 @@ export default function Footer() {
             ))}
           </ul>
           <div className="footer__contact">
-            {contactInfo.locations.map(loc => (
-              <a key={loc.name}
+            {contactInfo.locations.map((loc) => (
+              <a
+                key={loc.name}
                 href={`https://maps.google.com/?q=${encodeURIComponent(loc.address)}`}
-                target="_blank" rel="noreferrer"
+                target="_blank"
+                rel="noreferrer"
                 className="footer__contact-item"
               >
                 <PinIcon /> {loc.short}

@@ -142,7 +142,7 @@ export default function AdminLayout() {
       {/* ── Small screen block (<768px) ── */}
       <div className="admin-mobile-block">
         <img
-          src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+          src="https://res.cloudinary.com/a7n4qcvi/image/upload/v1782668966/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_f68v8c.png"
           alt="Corporate Eye Clinic"
           className="admin-mobile-logo"
         />
@@ -169,7 +169,7 @@ export default function AdminLayout() {
         >
           <div className="admin-sidebar-brand">
             <img
-              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              src="https://res.cloudinary.com/a7n4qcvi/image/upload/v1782668966/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_f68v8c.png"
               alt="Corporate Eye Clinic"
               className="admin-sidebar-logo"
             />

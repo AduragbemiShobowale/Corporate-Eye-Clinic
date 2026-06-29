@@ -148,7 +148,7 @@ function HeroSection({ onBook }) {
             <div className="hero__logo-ring" />
             <div className="hero__logo-glow" />
             <img
-              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              src="https://res.cloudinary.com/a7n4qcvi/image/upload/v1782668966/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_f68v8c.png"
               alt="Corporate Eye Clinic"
               className="hero__logo"
             />
@@ -164,20 +164,20 @@ function HeroSection({ onBook }) {
 
           <div className="hero__badges">
             <span className="hero__badge-pill">🏥 3 Branches · Ibadan</span>
-            <span className="hero__badge-pill">👁 Eye Care</span>
+            <span className="hero__badge-pill">👁 Expert Optometry</span>
             <span className="hero__badge-pill">✦ Serving since 2001</span>
           </div>
 
           <div className="hero__btns">
-            <Link to="/services" className="btn btn--outline-white btn--lg">
-              Our services
-            </Link>
             <button
               className="btn btn--white btn--lg hero__btn-primary"
               onClick={onBook}
             >
               Book an eye exam <ArrowRight />
             </button>
+            <Link to="/services" className="btn btn--outline-white btn--lg">
+              Our services
+            </Link>
           </div>
         </div>
       </div>

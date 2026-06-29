@@ -11,7 +11,7 @@ const CATEGORIES = [
   { id: "for-her", label: "For Her" },
   { id: "for-kids", label: "For Kids" },
 ];
-const CLOUD_NAME = "dgde8cwjk";
+const CLOUD_NAME = "a7n4qcvi";
 const UPLOAD_PRESET = "cec_products"; // Create this unsigned preset in Cloudinary dashboard
 
 async function uploadToCloudinary(file) {

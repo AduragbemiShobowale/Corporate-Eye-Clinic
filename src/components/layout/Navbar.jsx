@@ -54,7 +54,7 @@ export default function Navbar() {
         <div className="navbar__inner container">
           <Link to="/" className="navbar__logo">
             <img
-              src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780805731/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_s6y2fd.png"
+              src="https://res.cloudinary.com/a7n4qcvi/image/upload/v1782668966/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_f68v8c.png"
               alt="Corporate Eye Clinic"
               className="navbar__logo-img"
             />
