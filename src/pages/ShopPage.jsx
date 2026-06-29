@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { shopCategories } from "../data/siteData";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
@@ -8,9 +8,190 @@ import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal"
 import "./ShopPage.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
-
 function formatNGN(n) {
   return "₦" + n.toLocaleString("en-NG");
+}
+
+// ── Skeleton loader card ─────────────────────────────────────────
+function SkeletonCard() {
+  return (
+    <div className="shop__skeleton-card">
+      <div className="shop__skeleton-img" />
+      <div className="shop__skeleton-body">
+        <div className="shop__skeleton-line shop__skeleton-line--short" />
+        <div className="shop__skeleton-line" />
+        <div className="shop__skeleton-line shop__skeleton-line--price" />
+        <div className="shop__skeleton-btn" />
+      </div>
+    </div>
+  );
+}
+
+// ── Mouse-follow empty / no-results state ────────────────────────
+function ShopEmptyState({ search }) {
+  const containerRef = useRef(null);
+  const glassesRef = useRef(null);
+  const particle1Ref = useRef(null);
+  const particle2Ref = useRef(null);
+  const particle3Ref = useRef(null);
+  const rafRef = useRef(null);
+  const targetRef = useRef({ x: 0, y: 0 });
+  const currentRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMove = (e) => {
+      const rect = container.getBoundingClientRect();
+      targetRef.current = {
+        x: ((e.clientX - rect.left) / rect.width - 0.5) * 2,
+        y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
+      };
+    };
+
+    // Touch support
+    const handleTouch = (e) => {
+      const t = e.touches[0];
+      const rect = container.getBoundingClientRect();
+      targetRef.current = {
+        x: ((t.clientX - rect.left) / rect.width - 0.5) * 2,
+        y: ((t.clientY - rect.top) / rect.height - 0.5) * 2,
+      };
+    };
+
+    const animate = () => {
+      // Smooth lerp toward target
+      currentRef.current.x +=
+        (targetRef.current.x - currentRef.current.x) * 0.06;
+      currentRef.current.y +=
+        (targetRef.current.y - currentRef.current.y) * 0.06;
+      const { x, y } = currentRef.current;
+
+      if (glassesRef.current) {
+        glassesRef.current.style.transform = `translate(${x * 22}px, ${y * 14}px) rotate(${x * 4}deg)`;
+      }
+      if (particle1Ref.current) {
+        particle1Ref.current.style.transform = `translate(${x * 36}px, ${y * 28}px)`;
+      }
+      if (particle2Ref.current) {
+        particle2Ref.current.style.transform = `translate(${x * -28}px, ${y * 20}px)`;
+      }
+      if (particle3Ref.current) {
+        particle3Ref.current.style.transform = `translate(${x * 18}px, ${y * -30}px)`;
+      }
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    container.addEventListener("touchmove", handleTouch, { passive: true });
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      container.removeEventListener("touchmove", handleTouch);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="shop__empty-state" ref={containerRef}>
+      {/* Floating particles */}
+      <div
+        className="shop__empty-particle shop__empty-particle--1"
+        ref={particle1Ref}
+      />
+      <div
+        className="shop__empty-particle shop__empty-particle--2"
+        ref={particle2Ref}
+      />
+      <div
+        className="shop__empty-particle shop__empty-particle--3"
+        ref={particle3Ref}
+      />
+
+      {/* Glasses SVG that follows the mouse */}
+      <div className="shop__empty-glasses" ref={glassesRef}>
+        <svg width="140" height="64" viewBox="0 0 140 64" fill="none">
+          {/* Left lens */}
+          <rect
+            x="4"
+            y="8"
+            width="54"
+            height="44"
+            rx="22"
+            stroke="#0D1B3E"
+            strokeWidth="5"
+            fill="rgba(13,27,62,0.05)"
+          />
+          {/* Right lens */}
+          <rect
+            x="82"
+            y="8"
+            width="54"
+            height="44"
+            rx="22"
+            stroke="#0D1B3E"
+            strokeWidth="5"
+            fill="rgba(13,27,62,0.05)"
+          />
+          {/* Bridge */}
+          <path
+            d="M58 28 C64 22 76 22 82 28"
+            stroke="#0D1B3E"
+            strokeWidth="4"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Left arm */}
+          <line
+            x1="4"
+            y1="24"
+            x2="-10"
+            y2="24"
+            stroke="#0D1B3E"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          {/* Right arm */}
+          <line
+            x1="136"
+            y1="24"
+            x2="150"
+            y2="24"
+            stroke="#0D1B3E"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          {/* Gold shimmer inside lenses */}
+          <ellipse cx="27" cy="26" rx="12" ry="8" fill="rgba(160,114,0,0.12)" />
+          <ellipse
+            cx="109"
+            cy="26"
+            rx="12"
+            ry="8"
+            fill="rgba(160,114,0,0.12)"
+          />
+        </svg>
+      </div>
+
+      <div className="shop__empty-text">
+        {search ? (
+          <>
+            <h3>
+              No results for "<strong>{search}</strong>"
+            </h3>
+            <p>Try a different search term or browse our categories above.</p>
+          </>
+        ) : (
+          <>
+            <h3>No products here yet</h3>
+            <p>Check back soon — new eyewear is on its way.</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function ShopPage() {
@@ -207,20 +388,13 @@ export default function ShopPage() {
               inline
             />
           ) : loadingProducts ? (
-            <div className="shop__empty">
-              <p>Loading products…</p>
+            <div className="shop__grid">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="shop__empty">
-              {search ? (
-                <p>
-                  No products match "<strong>{search}</strong>". Try a different
-                  search.
-                </p>
-              ) : (
-                <p>No products found in this category yet. Check back soon!</p>
-              )}
-            </div>
+            <ShopEmptyState search={search} />
           ) : (
             <>
               {/* Results count */}
