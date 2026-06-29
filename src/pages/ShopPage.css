@@ -625,3 +625,115 @@
 .shop__stock-label--critical {
   color: var(--color-primary);
 }
+
+/* ── Search bar ──────────────────────────────────────────────── */
+.shop__search-wrap {
+  position: relative;
+  margin: var(--space-4) 0 var(--space-2);
+  max-width: 480px;
+}
+
+.shop__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.shop__search-input {
+  width: 100%;
+  padding: 12px 40px 12px 44px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--white);
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.shop__search-input:focus {
+  border-color: var(--navy-800);
+  box-shadow: 0 0 0 3px rgba(13, 27, 62, 0.08);
+}
+
+.shop__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.shop__search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: color 0.1s;
+}
+.shop__search-clear:hover {
+  color: var(--teal-700);
+}
+
+.shop__results-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+/* ── Pagination ──────────────────────────────────────────────── */
+.shop__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-8) 0 var(--space-4);
+  flex-wrap: wrap;
+}
+
+.shop__page-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 var(--space-3);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop__page-btn:hover:not(:disabled) {
+  border-color: var(--navy-800);
+  color: var(--navy-800);
+  background: var(--off-white);
+}
+
+.shop__page-btn--active {
+  background: var(--navy-800);
+  border-color: var(--navy-800);
+  color: var(--white);
+  font-weight: 700;
+}
+
+.shop__page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

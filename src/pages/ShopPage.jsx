@@ -21,8 +21,10 @@ export default function ShopPage() {
   const [prescriptionType, setPrescriptionType] = useState("glasses");
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 12;
 
-  // Fetch live products from Supabase on mount
   useEffect(() => {
     supabase
       .from("products")
@@ -38,13 +40,31 @@ export default function ShopPage() {
 
   const handleCategoryClick = (catId) => {
     setActive(catId);
+    setSearch("");
+    setPage(1);
     if (catId !== "contacts") setContactsMode("regular");
   };
 
-  const filtered =
+  // Filter by category then by search query
+  const categoryFiltered =
     active === "all"
       ? products
       : products.filter((p) => p.category.includes(active));
+
+  const filtered = search.trim()
+    ? categoryFiltered.filter((p) =>
+        p.name.toLowerCase().includes(search.trim().toLowerCase()),
+      )
+    : categoryFiltered;
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Reset to page 1 when search or category changes
+  useEffect(() => {
+    setPage(1);
+  }, [search, active]);
 
   return (
     <>
@@ -100,6 +120,40 @@ export default function ShopPage() {
               </button>
             ))}
           </div>
+
+          {/* ── Search bar ── */}
+          {active !== "prescription" && (
+            <div className="shop__search-wrap">
+              <svg
+                className="shop__search-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                className="shop__search-input"
+                type="text"
+                placeholder="Search products…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button
+                  className="shop__search-clear"
+                  onClick={() => setSearch("")}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          )}
 
           {active === "contacts" && (
             <div className="shop__mode-switch">
@@ -158,95 +212,153 @@ export default function ShopPage() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="shop__empty">
-              <p>No products found in this category yet. Check back soon!</p>
+              {search ? (
+                <p>
+                  No products match "<strong>{search}</strong>". Try a different
+                  search.
+                </p>
+              ) : (
+                <p>No products found in this category yet. Check back soon!</p>
+              )}
             </div>
           ) : (
-            <div className="shop__grid">
-              {filtered.map((p) => {
-                const outOfStock = p.stock_qty === 0;
-                const discountedPrice =
-                  p.discount_percent > 0
-                    ? Math.round(p.price * (1 - p.discount_percent / 100))
-                    : null;
+            <>
+              {/* Results count */}
+              {search && (
+                <p className="shop__results-count">
+                  {filtered.length} result{filtered.length !== 1 ? "s" : ""} for
+                  "<strong>{search}</strong>"
+                </p>
+              )}
+              <div className="shop__grid">
+                {paginated.map((p) => {
+                  const outOfStock = p.stock_qty === 0;
+                  const discountedPrice =
+                    p.discount_percent > 0
+                      ? Math.round(p.price * (1 - p.discount_percent / 100))
+                      : null;
 
-                return (
-                  <div
-                    key={p.id}
-                    className={`card card--hover shop__card${outOfStock ? " shop__card--oos" : ""}`}
-                  >
-                    <div className="shop__card-img" aria-hidden="true">
-                      {p.image_url ? (
-                        <img
-                          src={p.image_url}
-                          alt={p.name}
-                          className="shop__card-photo"
-                        />
-                      ) : (
-                        <EyeglassIllustration category={p.category[0]} />
-                      )}
-                      {outOfStock && (
-                        <div className="shop__oos-overlay">
-                          <span>Out of stock</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="shop__card-body">
-                      {p.tag && (
-                        <span className="badge badge--teal shop__tag">
-                          {p.tag}
-                        </span>
-                      )}
-                      <h3 className="shop__card-name">{p.name}</h3>
-                      <div className="shop__card-price-wrap">
-                        {discountedPrice ? (
-                          <>
-                            <p className="shop__card-price shop__card-price--discounted">
-                              {formatNGN(discountedPrice)}
-                            </p>
-                            <p className="shop__card-price--original">
-                              {formatNGN(p.price)}
-                            </p>
-                            <span className="shop__discount-badge">
-                              {p.discount_percent}% off
-                            </span>
-                          </>
+                  return (
+                    <div
+                      key={p.id}
+                      className={`card card--hover shop__card${outOfStock ? " shop__card--oos" : ""}`}
+                    >
+                      <div className="shop__card-img" aria-hidden="true">
+                        {p.image_url ? (
+                          <img
+                            src={p.image_url}
+                            alt={p.name}
+                            className="shop__card-photo"
+                          />
                         ) : (
-                          <p className="shop__card-price">
-                            {formatNGN(p.price)}
-                          </p>
+                          <EyeglassIllustration category={p.category[0]} />
+                        )}
+                        {outOfStock && (
+                          <div className="shop__oos-overlay">
+                            <span>Out of stock</span>
+                          </div>
                         )}
                       </div>
+                      <div className="shop__card-body">
+                        {p.tag && (
+                          <span className="badge badge--teal shop__tag">
+                            {p.tag}
+                          </span>
+                        )}
+                        <h3 className="shop__card-name">{p.name}</h3>
+                        <div className="shop__card-price-wrap">
+                          {discountedPrice ? (
+                            <>
+                              <p className="shop__card-price shop__card-price--discounted">
+                                {formatNGN(discountedPrice)}
+                              </p>
+                              <p className="shop__card-price--original">
+                                {formatNGN(p.price)}
+                              </p>
+                              <span className="shop__discount-badge">
+                                {p.discount_percent}% off
+                              </span>
+                            </>
+                          ) : (
+                            <p className="shop__card-price">
+                              {formatNGN(p.price)}
+                            </p>
+                          )}
+                        </div>
 
-                      {/* Stock indicator — always shown */}
-                      {!outOfStock && (
-                        <p
-                          className={`shop__stock-label${
-                            p.stock_qty <= 3
-                              ? " shop__stock-label--critical"
+                        {/* Stock indicator — always shown */}
+                        {!outOfStock && (
+                          <p
+                            className={`shop__stock-label${
+                              p.stock_qty <= 3
+                                ? " shop__stock-label--critical"
+                                : p.stock_qty <= 10
+                                  ? " shop__stock-label--low"
+                                  : " shop__stock-label--ok"
+                            }`}
+                          >
+                            {p.stock_qty <= 3
+                              ? "🔴"
                               : p.stock_qty <= 10
-                                ? " shop__stock-label--low"
-                                : " shop__stock-label--ok"
-                          }`}
-                        >
-                          {p.stock_qty <= 3
-                            ? "🔴"
-                            : p.stock_qty <= 10
-                              ? "🟡"
-                              : "🟢"}{" "}
-                          {p.stock_qty <= 3
-                            ? `Only ${p.stock_qty} left — order soon`
-                            : p.stock_qty <= 10
-                              ? `Only ${p.stock_qty} left`
-                              : `${p.stock_qty} in stock`}
-                        </p>
-                      )}
+                                ? "🟡"
+                                : "🟢"}{" "}
+                            {p.stock_qty <= 3
+                              ? `Only ${p.stock_qty} left — order soon`
+                              : p.stock_qty <= 10
+                                ? `Only ${p.stock_qty} left`
+                                : `${p.stock_qty} in stock`}
+                          </p>
+                        )}
 
-                      <AddToCartBtn product={p} disabled={outOfStock} />
+                        <AddToCartBtn product={p} disabled={outOfStock} />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="shop__pagination">
+                  <button
+                    className="shop__page-btn"
+                    onClick={() => {
+                      setPage((p) => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={page === 1}
+                  >
+                    ← Prev
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (n) => (
+                      <button
+                        key={n}
+                        className={`shop__page-btn${page === n ? " shop__page-btn--active" : ""}`}
+                        onClick={() => {
+                          setPage(n);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                      >
+                        {n}
+                      </button>
+                    ),
+                  )}
+
+                  <button
+                    className="shop__page-btn"
+                    onClick={() => {
+                      setPage((p) => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={page === totalPages}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           <div className="shop__note card">
