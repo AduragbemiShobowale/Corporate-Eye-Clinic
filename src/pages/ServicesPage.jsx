@@ -1,386 +1,276 @@
-import React, { useState, useEffect } from "react";
-import { shopCategories } from "../data/siteData";
-import { useCart } from "../context/CartContext";
-import { supabase } from "../lib/supabase";
-import PrescriptionGlassesSection from "../components/ui/PrescriptionGlassesSection";
-import ContactLensPrescriptionSection from "../components/ui/ContactLensPrescriptionSection";
-// import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
-import "./ShopPage.css";
+import { useState } from "react";
+import { services } from "../data/siteData";
+import { useScrollReveal } from "../hooks/useScrollReveal";
+import BookingModal from "../components/ui/BookingModal";
+import "./ServicesPage.css";
 
-const fmt = (n) => "₦" + n.toLocaleString("en-NG");
+const PHOTOS = {
+  "eye-exam":
+    "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=80",
+  glaucoma:
+    "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=700&q=80",
+  contacts:
+    "https://images.unsplash.com/photo-1580752300992-559f8e0734e0?w=700&q=80",
+  "low-vision":
+    "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=700&q=80",
+  pediatric:
+    "https://images.unsplash.com/photo-1597733336794-12d05021d510?w=700&q=80",
+  industrial:
+    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=700&q=80",
+};
 
-function formatNGN(n) {
-  return "₦" + n.toLocaleString("en-NG");
-}
-
-export default function ShopPage() {
-  const [active, setActive] = useState("all");
-  const { addToCart, items } = useCart();
-  const [successName, setSuccessName] = useState(null);
-  const [contactsMode, setContactsMode] = useState("regular");
-  const [prescriptionType, setPrescriptionType] = useState("glasses");
-  const [products, setProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-
-  // Fetch live products from Supabase on mount
-  useEffect(() => {
-    supabase
-      .from("products")
-      .select(
-        "id, name, price, category, tag, stock_qty, discount_percent, image_url",
-      )
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setProducts(data || []);
-        setLoadingProducts(false);
-      });
-  }, []);
-
-  const handleCategoryClick = (catId) => {
-    setActive(catId);
-    if (catId !== "contacts") setContactsMode("regular");
-  };
-
-  const filtered =
-    active === "all"
-      ? products
-      : products.filter((p) => p.category.includes(active));
+export default function ServicesPage() {
+  const [showModal, setShowModal] = useState(false);
+  const gridRef = useScrollReveal({ threshold: 0.05 });
+  const techRef = useScrollReveal();
 
   return (
     <>
       {/* ── Photo Hero ── */}
-      <div className="page-hero shop-page-hero">
+      <div className="page-hero">
         <div className="page-hero__photo" aria-hidden="true">
           <img
-            src="https://images.unsplash.com/photo-1508296695146-257a814070b4?w=1600&q=85"
+            src="https://images.unsplash.com/photo-1516069677018-378515003435?w=1600&q=85"
             alt=""
           />
         </div>
         <div className="page-hero__overlay" aria-hidden="true" />
         <div className="page-hero__content">
-          <span className="page-hero__badge">
-            ✦ Affordable eyewear for every family
-          </span>
+          <span className="page-hero__badge">✦ Expert eye care</span>
           <h1>
-            Shop <span>Eyewear</span>
+            Our <span>Services</span>
           </h1>
           <p>
-            Designer frames, contact lenses, and sunglasses — for every member
-            of the family. 25% off your first contacts order.
+            Comprehensive eye care for every member of your family, at every
+            stage of life.
           </p>
         </div>
       </div>
 
-      {/* ── Promo bar ── */}
-      <div className="shop-promo">
-        <div className="container shop-promo__inner">
-          <span className="badge badge--amber">Limited offer</span>
-          <span className="shop-promo__text">
-            <strong>25% off your first contact lens order.</strong> Use code{" "}
-            <code>FIRSTLENS</code> at checkout.
-          </span>
-        </div>
-      </div>
-
-      <section className="section">
+      {/* Quick nav pills */}
+      <section className="section" style={{ paddingBlock: "var(--space-6)" }}>
         <div className="container">
-          <div className="shop__filters">
-            {shopCategories.map((cat) => (
-              <button
-                key={cat.id}
-                className={
-                  "shop__filter-btn" +
-                  (active === cat.id ? " active" : "") +
-                  (cat.id === "prescription" ? " shop__filter-btn--rx" : "")
-                }
-                onClick={() => handleCategoryClick(cat.id)}
-              >
-                {cat.id === "prescription" && "📋 "}
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {active === "contacts" && (
-            <div className="shop__mode-switch">
-              <button
-                className={`shop__mode-btn${contactsMode === "regular" ? " active" : ""}`}
-                onClick={() => setContactsMode("regular")}
-              >
-                🛍️ Regular — browse & buy
-              </button>
-              <button
-                className={`shop__mode-btn${contactsMode === "prescription" ? " active" : ""}`}
-                onClick={() => setContactsMode("prescription")}
-              >
-                📋 I have a prescription
-              </button>
-            </div>
-          )}
-
-          {active === "prescription" && (
-            <div className="shop__mode-switch">
-              <button
-                className={`shop__mode-btn${prescriptionType === "glasses" ? " active" : ""}`}
-                onClick={() => setPrescriptionType("glasses")}
-              >
-                👓 Glasses
-              </button>
-              <button
-                className={`shop__mode-btn${prescriptionType === "contacts" ? " active" : ""}`}
-                onClick={() => setPrescriptionType("contacts")}
-              >
-                👁️ Contact Lenses
-              </button>
-            </div>
-          )}
-
-          {active === "prescription" ? (
-            prescriptionType === "glasses" ? (
-              <PrescriptionGlassesSection
-                onSuccess={(name) => setSuccessName(name)}
-                inline
-              />
-            ) : (
-              <ContactLensPrescriptionSection
-                onSuccess={(name) => setSuccessName(name)}
-                inline
-              />
-            )
-          ) : active === "contacts" && contactsMode === "prescription" ? (
-            <ContactLensPrescriptionSection
-              onSuccess={(name) => setSuccessName(name)}
-              inline
-            />
-          ) : loadingProducts ? (
-            <div className="shop__empty">
-              <p>Loading products…</p>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="shop__empty">
-              <p>No products found in this category yet. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="shop__grid">
-              {filtered.map((p) => {
-                const outOfStock = p.stock_qty === 0;
-                const discountedPrice =
-                  p.discount_percent > 0
-                    ? Math.round(p.price * (1 - p.discount_percent / 100))
-                    : null;
-
-                return (
-                  <div
-                    key={p.id}
-                    className={`card card--hover shop__card${outOfStock ? " shop__card--oos" : ""}`}
-                  >
-                    <div className="shop__card-img" aria-hidden="true">
-                      {p.image_url ? (
-                        <img
-                          src={p.image_url}
-                          alt={p.name}
-                          className="shop__card-photo"
-                        />
-                      ) : (
-                        <EyeglassIllustration category={p.category[0]} />
-                      )}
-                      {outOfStock && (
-                        <div className="shop__oos-overlay">
-                          <span>Out of stock</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="shop__card-body">
-                      {p.tag && (
-                        <span className="badge badge--teal shop__tag">
-                          {p.tag}
-                        </span>
-                      )}
-                      <h3 className="shop__card-name">{p.name}</h3>
-                      <div className="shop__card-price-wrap">
-                        {discountedPrice ? (
-                          <>
-                            <p className="shop__card-price shop__card-price--discounted">
-                              {formatNGN(discountedPrice)}
-                            </p>
-                            <p className="shop__card-price--original">
-                              {formatNGN(p.price)}
-                            </p>
-                            <span className="shop__discount-badge">
-                              {p.discount_percent}% off
-                            </span>
-                          </>
-                        ) : (
-                          <p className="shop__card-price">
-                            {formatNGN(p.price)}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Stock indicator — always shown */}
-                      {!outOfStock && (
-                        <p
-                          className={`shop__stock-label${
-                            p.stock_qty <= 3
-                              ? " shop__stock-label--critical"
-                              : p.stock_qty <= 10
-                                ? " shop__stock-label--low"
-                                : " shop__stock-label--ok"
-                          }`}
-                        >
-                          {p.stock_qty <= 3
-                            ? "🔴"
-                            : p.stock_qty <= 10
-                              ? "🟡"
-                              : "🟢"}{" "}
-                          {p.stock_qty <= 3
-                            ? `Only ${p.stock_qty} left — order soon`
-                            : p.stock_qty <= 10
-                              ? `Only ${p.stock_qty} left`
-                              : `${p.stock_qty} in stock`}
-                        </p>
-                      )}
-
-                      <AddToCartBtn product={p} disabled={outOfStock} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="shop__note card">
-            <EyeIcon />
-            <div>
-              <h3>Need help choosing?</h3>
-              <p>
-                Book a free frame-fitting consultation with our optometrist and
-                get personalised recommendations for your face shape,
-                prescription, and lifestyle.
-              </p>
-              <a
-                href="/contact"
-                className="btn btn--primary"
-                style={{ marginTop: "1rem", display: "inline-flex" }}
-              >
-                Book a consultation
+          <div className="svc-pills">
+            {services.map((s) => (
+              <a key={s.id} href={"#" + s.id} className="svc-pill">
+                {s.title}
               </a>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {successName !== null && (
-        <OrderRequestSuccessModal
-          name={successName}
-          onClose={() => setSuccessName(null)}
-        />
-      )}
+      {/* Photo grid */}
+      <section
+        className="section section--alt svc-deco-section"
+        style={{ paddingTop: 0 }}
+      >
+        <div className="svc-deco svc-deco--glasses-1" aria-hidden="true">
+          <GlassesFrameSVG color="#0F6E56" opacity="0.08" />
+        </div>
+        <div className="svc-deco svc-deco--glasses-2" aria-hidden="true">
+          <SunglassesSVG color="#0F6E56" opacity="0.06" />
+        </div>
+        <div className="svc-deco svc-deco--ring-1" aria-hidden="true">
+          <EyeRingSVG color="#0F6E56" opacity="0.06" />
+        </div>
+        <div className="container">
+          <div className="svc-photo-grid stagger-children" ref={gridRef}>
+            {services.map((s) => (
+              <a key={s.id} href={"#" + s.id} className="svc-photo-card">
+                <img
+                  src={PHOTOS[s.id] || PHOTOS["eye-exam"]}
+                  alt={s.title}
+                  className="svc-photo-card__img"
+                  loading="lazy"
+                />
+                <div className="svc-photo-card__overlay" />
+                <div className="svc-photo-card__body">
+                  <h3 className="svc-photo-card__title">{s.title}</h3>
+                  <span className="svc-photo-card__cta">Read more</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      <FloatingCart />
+      {/* Tech section */}
+      <section className="section svc-deco-section">
+        <div className="svc-deco svc-deco--contact-1" aria-hidden="true">
+          <ContactLensSVG color="#0F6E56" opacity="0.07" />
+        </div>
+        <div className="svc-deco svc-deco--glasses-3" aria-hidden="true">
+          <GlassesRoundSVG color="#0F6E56" opacity="0.06" />
+        </div>
+        <div className="container svc-tech-grid reveal" ref={techRef}>
+          <div className="svc-tech-text">
+            <span className="section-label">Eye Diagnosis</span>
+            <h2 className="section-title">
+              Cutting-edge diagnostic equipment and technology
+            </h2>
+            <p className="section-subtitle" style={{ marginBottom: "1.5rem" }}>
+              Our optometrists perform routine eye exams designed to give you an
+              insight into your overall vision. Ensure your vision prescription
+              is up-to-date and identify concerns before they become problematic
+              with routine, annual eye exams.
+            </p>
+            <button
+              className="btn btn--primary btn--lg"
+              onClick={() => setShowModal(true)}
+            >
+              Book an eye exam
+            </button>
+          </div>
+          <div className="svc-tech-stack">
+            {services.slice(0, 4).map((s) => (
+              <a key={s.id} href={"#" + s.id} className="svc-tech-card">
+                <img
+                  src={PHOTOS[s.id] || PHOTOS["eye-exam"]}
+                  alt={s.title}
+                  className="svc-tech-card__img"
+                  loading="lazy"
+                />
+                <div className="svc-tech-card__overlay" />
+                <div className="svc-tech-card__body">
+                  <h3 className="svc-tech-card__title">{s.title}</h3>
+                  <span className="svc-tech-card__cta">Read more</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Individual service detail sections */}
+      {services.map((s, i) => (
+        <ServiceDetail
+          key={s.id}
+          s={s}
+          i={i}
+          photo={PHOTOS[s.id] || PHOTOS["eye-exam"]}
+          onBook={() => setShowModal(true)}
+        />
+      ))}
+
+      {/* Emergency CTA */}
+      <section className="section section--teal">
+        <div className="container" style={{ textAlign: "center" }}>
+          <span className="section-label section-label--white">
+            Emergency care
+          </span>
+          <h2
+            className="section-title section-title--white"
+            style={{ marginBottom: "1rem" }}
+          >
+            Eye emergency? We are available 7 days a week.
+          </h2>
+          <p
+            className="section-subtitle section-subtitle--white"
+            style={{ marginBottom: "2rem", marginInline: "auto" }}
+          >
+            Don't wait — call us immediately for any sudden vision changes, eye
+            injuries, or pain.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <a href="tel:+2348033372738" className="btn btn--white btn--lg">
+              Call now
+            </a>
+            <a
+              href="https://wa.me/2348033372738"
+              className="btn btn--outline-white btn--lg"
+            >
+              WhatsApp us
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {showModal && <BookingModal onClose={() => setShowModal(false)} />}
     </>
   );
 }
 
-function AddToCartBtn({ product, disabled }) {
-  const { addToCart, items } = useCart();
-  const [flash, setFlash] = React.useState(false);
-  const inCart = items.find((i) => i.product.id === product.id);
-
-  if (disabled) {
-    return (
-      <button
-        className="btn btn--primary shop__add-btn shop__add-btn--oos"
-        disabled
-      >
-        Out of stock
-      </button>
-    );
-  }
-
-  const handleAdd = () => {
-    addToCart(product);
-    setFlash(true);
-    setTimeout(() => setFlash(false), 600);
-  };
-
+function ServiceDetail({ s, i, photo, onBook }) {
+  const photoRef = useScrollReveal({ threshold: 0.1 });
+  const textRef = useScrollReveal({ threshold: 0.1 });
   return (
-    <button
-      className={`btn btn--primary shop__add-btn${flash ? " shop__add-btn--flash" : ""}`}
-      onClick={handleAdd}
+    <section
+      id={s.id}
+      className={
+        "section svc-detail svc-deco-section" +
+        (i % 2 !== 0 ? " section--alt" : "")
+      }
     >
-      {inCart ? (
-        <>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          In cart ({inCart.qty})
-        </>
-      ) : (
-        <>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-          </svg>
-          Add to cart
-        </>
+      {i % 3 === 0 && (
+        <div className="svc-deco svc-deco--glasses-alt-1" aria-hidden="true">
+          <GlassesFrameSVG color="#0F6E56" opacity="0.06" />
+        </div>
       )}
-    </button>
+      {i % 3 === 1 && (
+        <div className="svc-deco svc-deco--contact-alt-1" aria-hidden="true">
+          <ContactLensSVG color="#0F6E56" opacity="0.07" />
+        </div>
+      )}
+      {i % 3 === 2 && (
+        <div className="svc-deco svc-deco--ring-alt-1" aria-hidden="true">
+          <EyeRingSVG color="#0F6E56" opacity="0.06" />
+        </div>
+      )}
+      {i % 2 === 0 && <div className="svc-detail__deco" aria-hidden="true" />}
+      <div className="container svc-detail__grid">
+        <div className="svc-detail__photo reveal reveal--left" ref={photoRef}>
+          <img src={photo} alt={s.title} />
+          <div className="svc-detail__photo-badge">
+            <span>{s.title}</span>
+          </div>
+          <div className="svc-detail__photo-ring" aria-hidden="true" />
+        </div>
+        <div className="svc-detail__text reveal reveal--right" ref={textRef}>
+          <span className="section-label">Our service</span>
+          <h2 className="section-title">{s.title}</h2>
+          <p className="section-subtitle" style={{ marginBottom: "1.5rem" }}>
+            {s.description}
+          </p>
+          <div className="svc-detail__symptoms">
+            <h4 className="svc-detail__symptoms-title">Signs and symptoms</h4>
+            <ul className="svc-detail__symptoms-list">
+              {s.symptoms.map((sym) => (
+                <li key={sym} className="svc-detail__symptom">
+                  <CheckIcon /> {sym}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="svc-detail__actions">
+            <button className="btn btn--primary" onClick={onBook}>
+              Book an appointment
+            </button>
+            <a href="tel:+2348033372738" className="btn btn--outline">
+              Call us
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-function FloatingCart() {
-  const { count, total, setDrawer } = useCart();
-  if (count === 0) return null;
+function GlassesFrameSVG({ color = "#0F6E56", opacity = 0.08 }) {
   return (
-    <div className="shop-cart-bar" onClick={() => setDrawer(true)}>
-      <div className="shop-cart-bar__left">
-        <span className="shop-cart-bar__badge">{count}</span>
-        <span className="shop-cart-bar__label">View cart</span>
-      </div>
-      <div className="shop-cart-bar__right">
-        <span className="shop-cart-bar__total">{fmt(total)}</span>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="5" y1="12" x2="19" y2="12" />
-          <polyline points="12 5 19 12 12 19" />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-/* ─── SVG Illustrations ─────────────────────────────────────── */
-function GlassesFrameSVG({ color = "#9FE1CB" }) {
-  return (
-    <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 200 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ opacity }}
+    >
       <rect
         x="10"
         y="20"
@@ -431,10 +321,14 @@ function GlassesFrameSVG({ color = "#9FE1CB" }) {
     </svg>
   );
 }
-
-function SunglassesSVG({ color = "#C9A84C" }) {
+function SunglassesSVG({ color = "#0F6E56", opacity = 0.06 }) {
   return (
-    <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 200 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ opacity }}
+    >
       <rect
         x="10"
         y="20"
@@ -444,7 +338,7 @@ function SunglassesSVG({ color = "#C9A84C" }) {
         stroke={color}
         strokeWidth="4"
         fill={color}
-        fillOpacity="0.15"
+        fillOpacity="0.12"
       />
       <rect
         x="120"
@@ -455,7 +349,7 @@ function SunglassesSVG({ color = "#C9A84C" }) {
         stroke={color}
         strokeWidth="4"
         fill={color}
-        fillOpacity="0.15"
+        fillOpacity="0.12"
       />
       <line
         x1="80"
@@ -487,10 +381,14 @@ function SunglassesSVG({ color = "#C9A84C" }) {
     </svg>
   );
 }
-
-function GlassesRoundSVG({ color = "#9FE1CB" }) {
+function GlassesRoundSVG({ color = "#0F6E56", opacity = 0.06 }) {
   return (
-    <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 200 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ opacity }}
+    >
       <circle
         cx="55"
         cy="41"
@@ -537,14 +435,18 @@ function GlassesRoundSVG({ color = "#9FE1CB" }) {
     </svg>
   );
 }
-
-function ContactLensSVG({ color = "#9FE1CB" }) {
+function ContactLensSVG({ color = "#0F6E56", opacity = 0.07 }) {
   return (
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ opacity }}
+    >
       <circle
         cx="50"
         cy="50"
-        r="40"
+        r="46"
         stroke={color}
         strokeWidth="4"
         fill="none"
@@ -552,159 +454,63 @@ function ContactLensSVG({ color = "#9FE1CB" }) {
       <circle
         cx="50"
         cy="50"
-        r="22"
+        r="28"
         stroke={color}
         strokeWidth="3"
         strokeDasharray="6 4"
         fill="none"
       />
-      <circle cx="50" cy="50" r="8" fill={color} fillOpacity="0.4" />
+      <circle cx="50" cy="50" r="12" fill={color} fillOpacity="0.3" />
     </svg>
   );
 }
-
-function EyeglassIllustration({ category }) {
-  const colors = {
-    frames: { bg: "#E1F5EE", stroke: "#0F6E56" },
-    contacts: { bg: "#E6F1FB", stroke: "#185FA5" },
-    sunglasses: { bg: "#FAEEDA", stroke: "#BA7517" },
-  };
-  const c = colors[category] || colors.frames;
+function EyeRingSVG({ color = "#0F6E56", opacity = 0.06 }) {
   return (
     <svg
-      viewBox="0 0 160 100"
-      width="100%"
-      aria-hidden="true"
-      style={{ display: "block" }}
+      viewBox="0 0 200 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ opacity }}
     >
-      <rect width="160" height="100" fill={c.bg} rx="8" />
-      {category === "contacts" ? (
-        <>
-          <circle
-            cx="60"
-            cy="50"
-            r="22"
-            fill="none"
-            stroke={c.stroke}
-            strokeWidth="3"
-          />
-          <circle
-            cx="60"
-            cy="50"
-            r="10"
-            fill="none"
-            stroke={c.stroke}
-            strokeWidth="2"
-            strokeDasharray="4 3"
-          />
-          <circle
-            cx="100"
-            cy="50"
-            r="22"
-            fill="none"
-            stroke={c.stroke}
-            strokeWidth="3"
-          />
-          <circle
-            cx="100"
-            cy="50"
-            r="10"
-            fill="none"
-            stroke={c.stroke}
-            strokeWidth="2"
-            strokeDasharray="4 3"
-          />
-        </>
-      ) : (
-        <>
-          <rect
-            x="18"
-            y="35"
-            width="52"
-            height="32"
-            rx={category === "sunglasses" ? 16 : 8}
-            fill={c.bg}
-            stroke={c.stroke}
-            strokeWidth="3"
-          />
-          <rect
-            x="90"
-            y="35"
-            width="52"
-            height="32"
-            rx={category === "sunglasses" ? 16 : 8}
-            fill={c.bg}
-            stroke={c.stroke}
-            strokeWidth="3"
-          />
-          <line
-            x1="70"
-            y1="51"
-            x2="90"
-            y2="51"
-            stroke={c.stroke}
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-          <line
-            x1="8"
-            y1="44"
-            x2="18"
-            y2="48"
-            stroke={c.stroke}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          <line
-            x1="142"
-            y1="44"
-            x2="152"
-            y2="48"
-            stroke={c.stroke}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          {category === "sunglasses" && (
-            <>
-              <rect
-                x="22"
-                y="39"
-                width="44"
-                height="24"
-                rx="12"
-                fill={c.stroke}
-                opacity="0.15"
-              />
-              <rect
-                x="94"
-                y="39"
-                width="44"
-                height="24"
-                rx="12"
-                fill={c.stroke}
-                opacity="0.15"
-              />
-            </>
-          )}
-        </>
-      )}
+      <ellipse
+        cx="100"
+        cy="60"
+        rx="96"
+        ry="54"
+        stroke={color}
+        strokeWidth="2"
+        fill="none"
+      />
+      <path
+        d="M8 60 C40 10 160 10 192 60 C160 110 40 110 8 60Z"
+        stroke={color}
+        strokeWidth="3"
+        fill="none"
+      />
+      <circle
+        cx="100"
+        cy="60"
+        r="22"
+        stroke={color}
+        strokeWidth="3"
+        fill="none"
+      />
+      <circle cx="100" cy="60" r="10" fill={color} fillOpacity="0.2" />
     </svg>
   );
 }
-
-const EyeIcon = () => (
+const CheckIcon = () => (
   <svg
-    width="32"
-    height="32"
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.8"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ color: "var(--teal-700)", flexShrink: 0, marginTop: "4px" }}
+    aria-hidden="true"
   >
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
+    <polyline points="20 6 9 17 4 12" />
   </svg>
 );

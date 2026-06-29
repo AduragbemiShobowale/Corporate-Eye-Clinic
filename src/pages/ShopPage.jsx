@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
 import PrescriptionGlassesSection from "../components/ui/PrescriptionGlassesSection";
 import ContactLensPrescriptionSection from "../components/ui/ContactLensPrescriptionSection";
-// import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
+import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
 import "./ShopPage.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
@@ -29,7 +29,7 @@ export default function ShopPage() {
       .select(
         "id, name, price, category, tag, stock_qty, discount_percent, image_url",
       )
-      .order("created_at", { ascending: true })
+      .order("name", { ascending: true })
       .then(({ data }) => {
         setProducts(data || []);
         setLoadingProducts(false);
@@ -72,7 +72,7 @@ export default function ShopPage() {
       </div>
 
       {/* ── Promo bar ── */}
-      {/* <div className="shop-promo">
+      <div className="shop-promo">
         <div className="container shop-promo__inner">
           <span className="badge badge--amber">Limited offer</span>
           <span className="shop-promo__text">
@@ -80,7 +80,7 @@ export default function ShopPage() {
             <code>FIRSTLENS</code> at checkout.
           </span>
         </div>
-      </div> */}
+      </div>
 
       <section className="section">
         <div className="container">
