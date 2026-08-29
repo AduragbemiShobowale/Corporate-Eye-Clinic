@@ -56,6 +56,20 @@ const NAV_ITEMS = [
     label: "Staff Directory",
     roles: ["super_admin"],
   },
+  // ── New ──
+  {
+    to: "/admin/staff-management",
+    icon: "🔑",
+    label: "Staff Management",
+    roles: ["super_admin"],
+  },
+  {
+    to: "/admin/patient-directory",
+    icon: "📇",
+    label: "Patient Directory",
+    roles: ["super_admin", "staff", "doctor"],
+  },
+  // ── End new ──
   {
     to: "/admin/reporting",
     icon: "📊",
@@ -74,6 +88,13 @@ const NAV_ITEMS = [
     label: "Patient Records",
     roles: ["doctor", "super_admin"],
   },
+  // ── Change Password — bottom of nav, all roles ──
+  {
+    to: "/admin/change-password",
+    icon: "🔒",
+    label: "Change Password",
+    roles: ["super_admin", "staff", "doctor"],
+  },
 ];
 
 export default function AdminLayout() {
@@ -86,7 +107,6 @@ export default function AdminLayout() {
   const [notifCount, setNotifCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Refetch both counts on every route change
   useEffect(() => {
     if (!isSuperAdmin) return;
     async function fetchCounts() {
@@ -115,7 +135,6 @@ export default function AdminLayout() {
     fetchCounts();
   }, [isSuperAdmin, location.pathname]);
 
-  // Close sidebar on route change (tablet)
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
@@ -123,6 +142,7 @@ export default function AdminLayout() {
   const visibleNav = NAV_ITEMS.filter(
     (item) => profile && item.roles.includes(profile.role),
   );
+
   const initials =
     profile?.full_name
       ?.split(" ")
@@ -139,7 +159,6 @@ export default function AdminLayout() {
 
   return (
     <>
-      {/* ── Small screen block (<768px) ── */}
       <div className="admin-mobile-block">
         <img
           src="https://res.cloudinary.com/a7n4qcvi/image/upload/v1782668966/96AB81CC-BE2F-4C97-B0DB-BDEF573A840D_f68v8c.png"
@@ -153,9 +172,7 @@ export default function AdminLayout() {
         </p>
       </div>
 
-      {/* ── Full admin shell (≥768px) ── */}
       <div className="admin-shell">
-        {/* Backdrop — closes sidebar on tablet when clicked outside */}
         {sidebarOpen && (
           <div
             className="admin-sidebar-backdrop"
@@ -163,7 +180,6 @@ export default function AdminLayout() {
           />
         )}
 
-        {/* ── Sidebar ── */}
         <aside
           className={`admin-sidebar${sidebarOpen ? " admin-sidebar--open" : ""}`}
         >
@@ -177,7 +193,6 @@ export default function AdminLayout() {
               <p className="admin-sidebar-clinic">Corporate Eye Clinic</p>
               <p className="admin-sidebar-portal">Admin Portal</p>
             </div>
-            {/* Close button — tablet only */}
             <button
               className="admin-sidebar-close"
               onClick={() => setSidebarOpen(false)}
@@ -255,9 +270,7 @@ export default function AdminLayout() {
           </button>
         </aside>
 
-        {/* ── Main content ── */}
         <div className="admin-main">
-          {/* Hamburger — only visible on tablet */}
           <button
             className="admin-hamburger"
             onClick={() => setSidebarOpen(true)}
@@ -281,7 +294,6 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      {/* ── Logout confirmation modal ── */}
       {showConfirm && (
         <div
           className="admin-modal-backdrop"

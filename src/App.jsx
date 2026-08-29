@@ -7,7 +7,6 @@ import {
 import { Toaster } from "react-hot-toast";
 import { useAdminAuth } from "./admin/context/AdminAuthContext";
 
-// Redirects to the correct landing page based on role
 function AdminIndex() {
   const { profile, loading } = useAdminAuth();
   if (loading) return null;
@@ -15,6 +14,7 @@ function AdminIndex() {
     return <Navigate to="/admin/appointments" replace />;
   return <Dashboard />;
 }
+
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
@@ -29,13 +29,11 @@ import LocationsPage from "./pages/LocationsPage";
 import PageError from "./pages/PageError";
 import ScrollToTop from "./components/layout/ScrollToTop";
 
-// Admin — foundation
 import { AdminAuthProvider } from "./admin/context/AdminAuthContext";
 import AdminLogin from "./admin/AdminLogin";
 import AdminLayout from "./admin/layout/AdminLayout";
 import RoleGuard from "./admin/guards/RoleGuard";
 
-// Admin — pages
 import Dashboard from "./admin/pages/Dashboard";
 import Products from "./admin/pages/Products";
 import Bookings from "./admin/pages/Bookings";
@@ -43,6 +41,9 @@ import ShopOrders from "./admin/pages/ShopOrders";
 import Prescriptions from "./admin/pages/Prescriptions";
 import PendingApprovals from "./admin/pages/PendingApprovals";
 import StaffDirectory from "./admin/pages/StaffDirectory";
+import StaffManagement from "./admin/pages/StaffManagement";
+import ChangePassword from "./admin/pages/ChangePassword";
+import PatientDirectory from "./admin/pages/PatientDirectory";
 import Reporting from "./admin/pages/Reporting";
 import DoctorAppointments from "./admin/pages/DoctorAppointments";
 import PatientRecords from "./admin/pages/PatientRecords";
@@ -74,8 +75,6 @@ export default function App() {
       />
       <ScrollToTop />
       <Routes>
-        {/* ── Admin portal — must come first so /admin/* is matched
-            before the public catch-all below swallows it ── */}
         <Route
           path="/admin/*"
           element={
@@ -147,6 +146,33 @@ export default function App() {
                       </RoleGuard>
                     }
                   />
+                  {/* ── New: Staff Management (create accounts + reset passwords) ── */}
+                  <Route
+                    path="staff-management"
+                    element={
+                      <RoleGuard allowed={["super_admin"]}>
+                        <StaffManagement />
+                      </RoleGuard>
+                    }
+                  />
+                  {/* ── New: Patient Directory (all roles) ── */}
+                  <Route
+                    path="patient-directory"
+                    element={
+                      <RoleGuard allowed={["super_admin", "staff", "doctor"]}>
+                        <PatientDirectory />
+                      </RoleGuard>
+                    }
+                  />
+                  {/* ── New: Change Password (all roles) ── */}
+                  <Route
+                    path="change-password"
+                    element={
+                      <RoleGuard allowed={["super_admin", "staff", "doctor"]}>
+                        <ChangePassword />
+                      </RoleGuard>
+                    }
+                  />
                   <Route
                     path="reporting"
                     element={
@@ -187,9 +213,6 @@ export default function App() {
           }
         />
 
-        {/* ── Public site — path="/*" catches everything not matched
-            above. Inner routes use relative paths (no leading slash)
-            because they are children of the "/*" match. ── */}
         <Route
           path="/*"
           element={

@@ -248,7 +248,7 @@ export const contactInfo = {
   address: "Royal Mall, Adjacent Methodist Church Bodija, Ibadan",
   phone: "+234 803 337 2738",
   email: "corporateeyeclinic@gmail.com",
-  whatsapp: "https://wa.me/2348033372738",
+  whatsapp: "https://wa.me/2348033372738?text=Hello%20Corporate%20Eye%20Clinic%2C%20I%20would%20like%20to%20enquire%20about%20your%20eye%20care%20services.%20Could%20you%20please%20assist%20me%3F",
   socials: {
     facebook: "https://facebook.com/corporateeyeclinic",
     instagram: "https://instagram.com/corporateeyeclinic",

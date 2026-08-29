@@ -163,9 +163,24 @@ function HeroSection({ onBook }) {
           <div className="hero__divider" aria-hidden="true" />
 
           <div className="hero__badges">
-            <span className="hero__badge-pill">🏥 3 Branches · Ibadan</span>
-            <span className="hero__badge-pill">👁 Expert Optometry</span>
-            <span className="hero__badge-pill">✦ Serving since 2001</span>
+            <Link
+              to="/locations"
+              className="hero__badge-pill hero__badge-pill--link"
+            >
+              🏥 3 Branches · Ibadan
+            </Link>
+            <Link
+              to="/services"
+              className="hero__badge-pill hero__badge-pill--link"
+            >
+              👁 Expert Eye Care
+            </Link>
+            <Link
+              to="/about"
+              className="hero__badge-pill hero__badge-pill--link"
+            >
+              ✦ Serving since 2001
+            </Link>
           </div>
 
           <div className="hero__btns">
@@ -224,7 +239,7 @@ function WelcomeSection({ onBook }) {
             ocular well-being of our host community and its environs.
           </p>
           <p className="section-subtitle">
-            With branches in Bodija, Cocoa House, and Oluyole Estate, expert eye
+            With branches in Bodija, New Bodija, and Oluyole Estate, expert eye
             care is never far away — for every member of your family.
           </p>
           <div className="welcome__actions">

@@ -6,8 +6,10 @@ import "./CheckoutModal.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
 
-// ── Replace with your real Paystack public key ──
-const PAYSTACK_PUBLIC_KEY = "pk_test_1b9fdf16809a6da56ce4f9e59592732352bc8cf7";
+// ── Monnify credentials (TEST mode for now) ──
+const MONNIFY_API_KEY = "MK_TEST_50KG7Q5V5N";
+const MONNIFY_CONTRACT_CODE = "6066846444";
+const MONNIFY_IS_TEST_MODE = true; // flip to false once live keys are swapped in
 const DELIVERY_FEE = 3500; // ₦3,500 flat fee — added only when Dispatch/Delivery is selected
 
 export default function CheckoutModal({ onClose }) {
@@ -137,87 +139,95 @@ export default function CheckoutModal({ onClose }) {
     window.dispatchEvent(new CustomEvent("cec:checkout-success"));
   };
 
-  const initPaystack = () => {
+  const initMonnify = () => {
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
       return;
     }
 
-    if (PAYSTACK_PUBLIC_KEY.includes("xxxxxxxx")) {
-      setErrors({
-        submit:
-          "Payments are not yet configured — the Paystack public key is still a placeholder. Replace PAYSTACK_PUBLIC_KEY in CheckoutModal.jsx with your real key.",
-      });
-      return;
-    }
-
     setStep("paying");
 
     const launch = () => {
-      const handler = window.PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: form.email,
-        amount: payableTotal * 100,
+      const paymentRef = "CEC-" + Date.now();
+
+      if (!window.MonnifySDK) {
+        setErrors({
+          submit:
+            "Payment system failed to load. Please refresh and try again.",
+        });
+        setStep("form");
+        return;
+      }
+
+      window.MonnifySDK.initialize({
+        amount: payableTotal,
         currency: "NGN",
-        ref: "CEC-" + Date.now(),
+        reference: paymentRef,
+        customerFullName: form.name,
+        customerEmail: form.email,
+        customerMobileNumber: form.phone,
+        apiKey: MONNIFY_API_KEY,
+        contractCode: MONNIFY_CONTRACT_CODE,
+        paymentDescription: "Corporate Eye Clinic — Shop Order",
+        isTestMode: MONNIFY_IS_TEST_MODE,
         metadata: {
-          custom_fields: [
-            {
-              display_name: "Customer Name",
-              variable_name: "name",
-              value: form.name,
-            },
-            {
-              display_name: "Phone",
-              variable_name: "phone",
-              value: form.phone,
-            },
-            {
-              display_name: "Fulfillment",
-              variable_name: "fulfillment",
-              value: form.fulfillment,
-            },
-          ],
+          fulfillment: form.fulfillment,
         },
-        // IMPORTANT: must be a plain (non-async) function — Paystack's inline.js
-        // validates callback.constructor === Function, and async functions fail
-        // that check (their constructor is AsyncFunction), causing
-        // "Attribute callback must be a valid function".
-        callback: function (response) {
-          saveOrderAndNotify(response.reference)
-            .then(() => {
-              clearCart();
-              setStep("success");
-              window.dispatchEvent(new CustomEvent("cec:checkout-success"));
-            })
-            .catch((err) => {
-              console.error("Post-payment save failed:", err);
-              clearCart();
-              setStep("success");
-              window.dispatchEvent(new CustomEvent("cec:checkout-success"));
+        paymentMethods: ["ACCOUNT_TRANSFER", "CARD", "USSD"],
+        onComplete: function (response) {
+          // Monnify returns paymentStatus: "PAID" on success
+          if (
+            response.paymentStatus === "PAID" ||
+            response.status === "SUCCESS"
+          ) {
+            saveOrderAndNotify(response.transactionReference || paymentRef)
+              .then(() => {
+                clearCart();
+                setStep("success");
+                window.dispatchEvent(new CustomEvent("cec:checkout-success"));
+              })
+              .catch((err) => {
+                console.error("Post-payment save failed:", err);
+                clearCart();
+                setStep("success");
+                window.dispatchEvent(new CustomEvent("cec:checkout-success"));
+              });
+          } else {
+            setErrors({
+              submit: "Payment was not completed. Please try again.",
             });
+            setStep("form");
+          }
         },
-        onClose: () => setStep("form"),
+        onClose: function () {
+          setStep("form");
+        },
       });
-      handler.openIframe();
     };
 
-    const existingScript = document.getElementById("paystack-script");
-    if (existingScript) {
+    const existingScript = document.getElementById("monnify-script");
+    if (existingScript && window.MonnifySDK) {
       launch();
       return;
     }
     const script = document.createElement("script");
-    script.id = "paystack-script";
-    script.src = "https://js.paystack.co/v1/inline.js";
+    script.id = "monnify-script";
+    script.src = "https://sdk.monnify.com/plugin/monnify.js";
     script.onload = launch;
+    script.onerror = () => {
+      setErrors({
+        submit:
+          "Could not load payment system. Check your connection and try again.",
+      });
+      setStep("form");
+    };
     document.body.appendChild(script);
   };
 
   const handleSubmit = () => {
     if (payableTotal > 0) {
-      initPaystack();
+      initMonnify();
     } else {
       submitQuoteOnlyOrder();
     }
@@ -431,7 +441,7 @@ export default function CheckoutModal({ onClose }) {
               <p className="checkout-form__note">
                 <LockIcon />{" "}
                 {payableTotal > 0
-                  ? "Secured by Paystack. Your payment details are encrypted."
+                  ? "Secured by Monnify. Your payment details are encrypted."
                   : "No payment required — we will contact you with a quote."}
               </p>
             </div>

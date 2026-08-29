@@ -1,0 +1,77 @@
+.sm-create-modal {
+  max-width: 520px !important;
+  text-align: left !important;
+}
+
+.sm-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-5) 0;
+}
+
+.sm-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.sm-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sm-field label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.sm-pass-wrap {
+  position: relative;
+}
+
+.sm-pass-wrap .admin-input {
+  padding-right: 40px;
+}
+
+.sm-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  line-height: 1;
+}
+
+.sm-err {
+  font-size: var(--font-size-xs);
+  color: var(--teal-700);
+  margin: 0;
+}
+
+.admin-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--off-white);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.admin-input:focus { border-color: var(--navy-800); background: var(--white); }
+.admin-input.err   { border-color: var(--teal-700); }
+
+@media (max-width: 479px) {
+  .sm-row { grid-template-columns: 1fr; }
+}

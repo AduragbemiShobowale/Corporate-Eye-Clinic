@@ -1,0 +1,25 @@
+/* Patient Directory page styles */
+.admin-page-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 4px 0 0;
+}
+
+.admin-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--off-white);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.admin-input:focus {
+  border-color: var(--navy-800);
+  background: var(--white);
+}
