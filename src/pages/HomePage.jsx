@@ -240,7 +240,7 @@ function WelcomeSection({ onBook }) {
           </p>
           <p className="section-subtitle">
             With branches in Bodija, New Bodija, and Oluyole Estate, expert eye
-            care is never far away — for every member of your family.
+            care is never far away for every member of your family.
           </p>
           <div className="welcome__actions">
             <button className="btn btn--primary" onClick={onBook}>
