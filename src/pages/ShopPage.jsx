@@ -278,14 +278,14 @@ export default function ShopPage() {
             Shop <span>Eyewear</span>
           </h1>
           <p>
-            Designer frames, contact lenses, and sunglasses — for every member
-            of the family. 25% off your first contacts order.
+            Designer frames, contact lenses, and sunglasses for every member
+            of the family. 
           </p>
         </div>
       </div>
 
       {/* ── Promo bar ── */}
-      <div className="shop-promo">
+      {/* <div className="shop-promo">
         <div className="container shop-promo__inner">
           <span className="badge badge--amber">Limited offer</span>
           <span className="shop-promo__text">
@@ -293,7 +293,7 @@ export default function ShopPage() {
             <code>FIRSTLENS</code> at checkout.
           </span>
         </div>
-      </div>
+      </div> */}
 
       <section className="section">
         <div className="container">

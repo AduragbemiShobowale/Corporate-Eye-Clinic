@@ -9,9 +9,11 @@ const BRANCH_TO_LOCATION = {
   "New Bodija Branch": "3B Aare Avenue, New Bodija, Ibadan",
 };
 
-function StatCard({ label, value, sub, accent }) {
+function StatCard({ label, value, sub, accent, warning }) {
   return (
-    <div className={`dash-card${accent ? " dash-card--accent" : ""}`}>
+    <div
+      className={`dash-card${accent ? " dash-card--accent" : ""}${warning ? " dash-card--warning" : ""}`}
+    >
       <p className="dash-card-value">{value ?? "—"}</p>
       <p className="dash-card-label">{label}</p>
       {sub && <p className="dash-card-sub">{sub}</p>}
@@ -32,6 +34,7 @@ export default function Dashboard() {
   const today = new Date().toISOString().split("T")[0];
 
   const [stats, setStats] = useState(null);
+  const [awaitingPayment, setAwaitingPayment] = useState(0);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,6 +59,7 @@ export default function Dashboard() {
         { count: pendingRx },
         { count: lowStock },
         { count: pendingApprovals },
+        { count: awaitingVerification },
         { data: recentBookings },
       ] = await Promise.all([
         todayBase,
@@ -89,6 +93,11 @@ export default function Dashboard() {
               count: (b.count || 0) + (s.count || 0) + (p.count || 0),
             }))
           : { count: 0 },
+        // Awaiting bank transfer payment verification
+        supabase
+          .from("shop_orders")
+          .select("*", { count: "exact", head: true })
+          .eq("payment_status", "submitted"),
         supabase
           .from("bookings")
           .select("id, name, service, date, time_slot, location, status")
@@ -103,6 +112,7 @@ export default function Dashboard() {
         lowStock,
         pendingApprovals,
       });
+      setAwaitingPayment(awaitingVerification || 0);
       setRecent(recentBookings || []);
       setLoading(false);
     }
@@ -155,6 +165,13 @@ export default function Dashboard() {
             label="Pending approvals"
             value={stats.pendingApprovals}
             accent={stats.pendingApprovals > 0}
+          />
+        )}
+        {isSuperAdmin && (
+          <StatCard
+            label="Awaiting payment verification"
+            value={awaitingPayment}
+            warning={awaitingPayment > 0}
           />
         )}
       </div>

@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import "./TablePage.css";
@@ -28,6 +28,153 @@ const PAYMENT_LABEL = {
   transfer: "Transfer",
   online: "Online (Paystack)",
 };
+
+const PAYMENT_BADGE = {
+  unpaid: { label: "Unpaid", color: "#6b7280", bg: "#f3f4f6" },
+  submitted: {
+    label: "Awaiting Verification",
+    color: "#92400e",
+    bg: "#fffbeb",
+  },
+  verified: { label: "Payment Verified", color: "#166534", bg: "#f0fdf4" },
+  rejected: { label: "Payment Rejected", color: "#991b1b", bg: "#fef2f2" },
+};
+
+const SUPABASE_URL = "https://cacniprnjuwuavhhfowu.supabase.co";
+const ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg";
+
+// ── Payment Confirmation Modal ──────────────────────────────────
+function PaymentConfirmModal({ order, onConfirm, onCancel, loading }) {
+  return (
+    <div className="admin-modal-backdrop" onClick={onCancel}>
+      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="admin-modal-icon-wrap"
+          style={{ background: "#f0fdf4" }}
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#166534"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h2 className="admin-modal-title">Confirm Payment</h2>
+        <p className="admin-modal-body">
+          Confirm you have received{" "}
+          <strong>₦{(order.paid_total || 0).toLocaleString()}</strong> for order{" "}
+          <strong>{order.payment_ref}</strong> from{" "}
+          <strong>{order.customer_name}</strong>?
+        </p>
+        <p
+          style={{
+            fontSize: 13,
+            color: "#92400e",
+            background: "#fffbeb",
+            padding: "10px 14px",
+            borderRadius: 8,
+            margin: "0 0 16px",
+            border: "1px solid #fcd34d",
+          }}
+        >
+          ⚠️ Only confirm after verifying the transfer in your bank app.
+        </p>
+        <div className="admin-modal-actions">
+          <button
+            className="admin-btn admin-btn--ghost"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            className="admin-btn admin-btn--primary"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? "Confirming…" : "Yes, confirm payment"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Payment Reject Modal ─────────────────────────────────────────
+function PaymentRejectModal({ order, onReject, onCancel, loading }) {
+  const [notes, setNotes] = React.useState("");
+  return (
+    <div className="admin-modal-backdrop" onClick={onCancel}>
+      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="admin-modal-icon-wrap"
+          style={{ background: "#fef2f2" }}
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#991b1b"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </div>
+        <h2 className="admin-modal-title">Reject Payment</h2>
+        <p className="admin-modal-body">
+          Reject payment for order <strong>{order.payment_ref}</strong>? Stock
+          reservation will be released.
+        </p>
+        <div style={{ marginBottom: 16 }}>
+          <label
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: "#374151",
+              display: "block",
+              marginBottom: 6,
+            }}
+          >
+            Reason (optional)
+          </label>
+          <input
+            className="admin-input"
+            placeholder="e.g. Wrong amount transferred"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+        <div className="admin-modal-actions">
+          <button
+            className="admin-btn admin-btn--ghost"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            className="admin-btn admin-btn--danger"
+            onClick={() => onReject(notes)}
+            disabled={loading}
+          >
+            {loading ? "Rejecting…" : "Reject payment"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function nextStatuses(current, isSuperAdmin) {
   if (isSuperAdmin && current === "cancellation_pending") return ["cancelled"];
@@ -479,6 +626,68 @@ export default function ShopOrders() {
     load();
   }, [status]);
 
+  const [confirmModal, setConfirmModal] = React.useState(null);
+  const [rejectModal, setRejectModal] = React.useState(null);
+  const [paymentLoading, setPaymentLoading] = React.useState(false);
+
+  async function confirmPayment(order) {
+    setPaymentLoading(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = await supabase.rpc("confirm_order_payment", {
+      p_order_id: order.id,
+      p_confirmed_by: user.id,
+    });
+    setPaymentLoading(false);
+    setConfirmModal(null);
+    if (error) {
+      toast.error("Error: " + error.message);
+      return;
+    }
+    toast.success("Payment confirmed — order is now processing");
+    // Fire customer confirmation email
+    if (order.customer_email && !order.customer_email.includes("@internal")) {
+      fetch(`${SUPABASE_URL}/functions/v1/send-payment-confirmed-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          customer_name: order.customer_name,
+          customer_email: order.customer_email,
+          payment_ref: order.payment_ref,
+          paid_total: order.paid_total,
+          items: order.items,
+          fulfillment: order.fulfillment,
+          delivery_address: order.delivery_address,
+        }),
+      }).catch(() => {});
+    }
+    load();
+  }
+
+  async function rejectPayment(order, notes) {
+    setPaymentLoading(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = await supabase.rpc("reject_order_payment", {
+      p_order_id: order.id,
+      p_rejected_by: user.id,
+      p_notes: notes || "Payment rejected by admin",
+    });
+    setPaymentLoading(false);
+    setRejectModal(null);
+    if (error) {
+      toast.error("Error: " + error.message);
+      return;
+    }
+    toast.success("Payment rejected — stock reservation released");
+    load();
+  }
+
   async function updateStatus(order, newStatus) {
     setUpdating(order.id);
     const { error } = await supabase
@@ -658,13 +867,61 @@ export default function ShopOrders() {
                       <span className={`admin-badge ${BADGE[o.status] || ""}`}>
                         {o.status?.replace("_", " ")}
                       </span>
-                      <EditorStamp
-                        updatedBy={o.status_updated_by}
-                        updatedAt={o.status_updated_at}
-                        profileMap={profileMap}
-                      />
+                      {o.payment_status && o.payment_status !== "unpaid" && (
+                        <div style={{ marginTop: 4 }}>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              padding: "2px 8px",
+                              borderRadius: 999,
+                              fontSize: 11,
+                              fontWeight: 600,
+                              color: PAYMENT_BADGE[o.payment_status]?.color,
+                              background: PAYMENT_BADGE[o.payment_status]?.bg,
+                            }}
+                          >
+                            {PAYMENT_BADGE[o.payment_status]?.label}
+                          </span>
+                        </div>
+                      )}
+                      {o.payment_status === "verified" &&
+                        o.payment_confirmed_by && (
+                          <EditorStamp
+                            updatedBy={o.payment_confirmed_by}
+                            updatedAt={o.payment_confirmed_at}
+                            profileMap={profileMap}
+                          />
+                        )}
+                      {o.payment_status !== "verified" && (
+                        <EditorStamp
+                          updatedBy={o.status_updated_by}
+                          updatedAt={o.status_updated_at}
+                          profileMap={profileMap}
+                        />
+                      )}
                     </td>
                     <td>
+                      {o.payment_status === "submitted" && isSuperAdmin && (
+                        <div
+                          className="tp-action-btns"
+                          style={{ marginBottom: 8 }}
+                        >
+                          <button
+                            className="admin-btn admin-btn--primary tp-sm-btn"
+                            disabled={updating === o.id}
+                            onClick={() => setConfirmModal(o)}
+                          >
+                            ✓ Confirm Payment
+                          </button>
+                          <button
+                            className="admin-btn admin-btn--danger tp-sm-btn"
+                            disabled={updating === o.id}
+                            onClick={() => setRejectModal(o)}
+                          >
+                            ✗ Reject
+                          </button>
+                        </div>
+                      )}
                       {o.status === "cancellation_pending" && isSuperAdmin ? (
                         <div className="tp-action-btns">
                           <button
@@ -774,6 +1031,22 @@ export default function ShopOrders() {
         )}
       </div>
 
+      {confirmModal && (
+        <PaymentConfirmModal
+          order={confirmModal}
+          loading={paymentLoading}
+          onConfirm={() => confirmPayment(confirmModal)}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
+      {rejectModal && (
+        <PaymentRejectModal
+          order={rejectModal}
+          loading={paymentLoading}
+          onReject={(notes) => rejectPayment(rejectModal, notes)}
+          onCancel={() => setRejectModal(null)}
+        />
+      )}
       {showWalkIn && (
         <WalkInSaleModal
           onClose={() => setShowWalkIn(false)}

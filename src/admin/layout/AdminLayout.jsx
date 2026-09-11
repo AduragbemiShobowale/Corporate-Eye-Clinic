@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import { supabase } from "../../lib/supabase";
 import "./AdminLayout.css";
+import TourManager from "../pages/TourManager";
 
 const NAV_ITEMS = [
   {
@@ -293,6 +294,8 @@ export default function AdminLayout() {
           <Outlet />
         </div>
       </div>
+
+      <TourManager profile={profile} />
 
       {showConfirm && (
         <div

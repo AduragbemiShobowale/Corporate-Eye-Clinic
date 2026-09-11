@@ -208,6 +208,7 @@ export default function BookingModal({ onClose }) {
       const booking = {
         name: form.name,
         phone: form.phone,
+        email: form.email || null,
         service: serviceName,
         doctor: form.doctor,
         date: dateStr,
@@ -419,6 +420,33 @@ export default function BookingModal({ onClose }) {
                       <span className="bm-field-error">{errors.phone}</span>
                     )}
                   </div>
+                </div>
+
+                {/* Email — optional but needed for confirmation */}
+                <div className="bm-field">
+                  <label>
+                    YOUR EMAIL{" "}
+                    <span
+                      style={{
+                        fontWeight: 400,
+                        color: "var(--color-text-muted)",
+                        textTransform: "none",
+                        fontSize: "11px",
+                      }}
+                    >
+                      (optional — for booking confirmation)
+                    </span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={set("email")}
+                    className={errors.email ? "bm-input--error" : ""}
+                  />
+                  {errors.email && (
+                    <span className="bm-field-error">{errors.email}</span>
+                  )}
                 </div>
 
                 {/* Booking Type — always visible */}

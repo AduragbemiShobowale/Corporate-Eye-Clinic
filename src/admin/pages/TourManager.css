@@ -1,0 +1,198 @@
+/* ── Overlay — dims page but allows clicks through ─────────────── */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 13, 31, 0.45);
+  z-index: 9000;
+  pointer-events: none;
+  animation: tourFadeIn 0.3s ease;
+}
+
+/* ── Highlight — pops target element above overlay ─────────────── */
+.tour-highlight {
+  position: relative;
+  z-index: 9500 !important;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 4px rgba(160, 114, 0, 0.6),
+    0 0 0 8px rgba(160, 114, 0, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  animation: tourPulse 2s ease-in-out infinite;
+}
+
+/* ── Tour card ──────────────────────────────────────────────────── */
+.tour-card {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: calc(100% - 40px);
+  max-width: 560px;
+  animation: tourSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tour-card--bottom {
+  bottom: 28px;
+}
+.tour-card--top {
+  top: 80px;
+}
+
+.tour-card-inner {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* ── Progress dots ──────────────────────────────────────────────── */
+.tour-progress {
+  display: flex;
+  gap: 6px;
+  padding: 14px 20px 0;
+}
+
+.tour-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  transition: all 0.2s;
+}
+
+.tour-dot.active {
+  background: #0d1b3e;
+  width: 20px;
+  border-radius: 3px;
+}
+
+.tour-dot.done {
+  background: #9b2d1f;
+}
+
+/* ── Content ────────────────────────────────────────────────────── */
+.tour-content {
+  padding: 16px 20px 12px;
+}
+
+.tour-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0d1b3e;
+  margin: 0 0 8px;
+}
+
+.tour-body {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Actions ────────────────────────────────────────────────────── */
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #f3f4f6;
+  background: #f9fafb;
+  gap: 8px;
+}
+
+.tour-actions-left,
+.tour-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-count {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.tour-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.tour-btn--primary {
+  background: #0d1b3e;
+  color: #fff;
+}
+.tour-btn--primary:hover {
+  background: #1a3060;
+}
+
+.tour-btn--ghost {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+.tour-btn--ghost:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tour-btn--full {
+  width: 100%;
+  text-align: center;
+}
+
+/* ── Animations ─────────────────────────────────────────────────── */
+@keyframes tourFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tourSlideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes tourPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(160, 114, 0, 0.6),
+      0 0 0 8px rgba(160, 114, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgba(160, 114, 0, 0.4),
+      0 0 0 12px rgba(160, 114, 0, 0.1);
+  }
+}
+
+@media (max-width: 600px) {
+  .tour-card {
+    left: 16px;
+    right: 16px;
+    transform: none;
+    width: auto;
+  }
+  .tour-card--top {
+    top: 70px;
+  }
+}

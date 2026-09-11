@@ -1,513 +1,487 @@
 import { useState } from "react";
-import { useCart } from "../../context/CartContext";
-import { contactInfo } from "../../data/siteData";
 import { supabase } from "../../lib/supabase";
+import { useCart } from "../../context/CartContext";
 import "./CheckoutModal.css";
 
-const fmt = (n) => "₦" + n.toLocaleString("en-NG");
+// ── Clinic bank details ───────────────────────────────────────────
+const BANK_NAME = "Zenith Bank";
+const ACCOUNT_NAME = "Corporate Eye Clinic";
+const ACCOUNT_NO = "1234567890"; // ← Replace with real account number
+const WHATSAPP_NO = "2348033372738";
+const DELIVERY_FEE = 3500;
 
-// ── Monnify credentials (TEST mode for now) ──
-const MONNIFY_API_KEY = "MK_TEST_50KG7Q5V5N";
-const MONNIFY_CONTRACT_CODE = "6066846444";
-const MONNIFY_IS_TEST_MODE = true; // flip to false once live keys are swapped in
-const DELIVERY_FEE = 3500; // ₦3,500 flat fee — added only when Dispatch/Delivery is selected
+const fmt = (n) => "₦" + Number(n).toLocaleString("en-NG");
 
-export default function CheckoutModal({ onClose }) {
+function generateRef() {
+  const d = new Date();
+  const ymd =
+    d.getFullYear().toString().slice(-2) +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    String(d.getDate()).padStart(2, "0");
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `EYE-${ymd}-${rand}`;
+}
+
+// ── Step 1: Checkout form ─────────────────────────────────────────
+function CheckoutForm({ onClose, onConfirmed }) {
   const { items, total, clearCart } = useCart();
+  const deliveryFee = items.length > 0 ? 0 : 0; // calculated per fulfillment below
   const [form, setForm] = useState({
     name: "",
-    email: "",
     phone: "",
+    email: "",
     fulfillment: "pickup",
-    location: "",
+    branch: "Head Office — Bodija",
     address: "",
   });
   const [errors, setErrors] = useState({});
-  const [step, setStep] = useState("form"); // 'form' | 'paying' | 'success'
+  const [saving, setSaving] = useState(false);
 
-  const hasQuoteItems = items.some((i) => i.options?.isQuote);
-  const hasPaidItems = items.some((i) => !i.options?.isQuote);
-  const deliveryFee =
-    form.fulfillment === "dispatch" && hasPaidItems ? DELIVERY_FEE : 0;
-  const payableTotal = total + deliveryFee; // quote items have price 0, so they don't add to total
+  const payable = total + (form.fulfillment === "dispatch" ? DELIVERY_FEE : 0);
 
-  const set = (k) => (e) => {
-    let v = e.target.value;
-    if (k === "phone" && !/^[0-9\s+\-()]*$/.test(v)) return;
-    setForm((f) => ({ ...f, [k]: v }));
-    if (errors[k]) setErrors((p) => ({ ...p, [k]: "" }));
-  };
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Full name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Enter a valid email";
     if (!form.phone.trim()) e.phone = "Phone number is required";
-    else if (form.phone.replace(/[\s+\-()]/g, "").length < 11)
-      e.phone = "Phone number must be at least 11 digits";
-    if (form.fulfillment === "pickup" && !form.location)
-      e.location = "Please select a pickup location";
+    if (!form.email.trim() || !form.email.includes("@"))
+      e.email = "Valid email is required";
+    if (form.fulfillment === "pickup" && !form.branch)
+      e.branch = "Please select a pickup branch";
     if (form.fulfillment === "dispatch" && !form.address.trim())
       e.address = "Delivery address is required";
     return e;
   };
 
-  const buildOrderPayload = (paymentRef = null) => ({
-    customer_name: form.name,
-    customer_email: form.email,
-    customer_phone: form.phone,
-    fulfillment: form.fulfillment,
-    location: form.fulfillment === "pickup" ? form.location : null,
-    delivery_address: form.fulfillment === "dispatch" ? form.address : null,
-    items: items.map((i) => ({
-      name: i.product.name,
-      qty: i.qty,
-      price: i.options?.isQuote ? null : i.product.price,
-      options: i.options || null,
-    })),
-    delivery_fee: deliveryFee,
-    paid_total: payableTotal,
-    has_quote_items: hasQuoteItems,
-    payment_ref: paymentRef,
-  });
-
-  const saveOrderAndNotify = async (paymentRef = null) => {
-    const payload = buildOrderPayload(paymentRef);
-    const { error } = await supabase.from("shop_orders").insert([payload]);
-    if (error) console.error("Order save failed:", error);
-
-    // Decrement stock_qty for each purchased item (loose — runs after payment,
-    // rare overselling accepted per design decision)
-    for (const item of items) {
-      if (!item.options?.isQuote && item.product.id) {
-        try {
-          // Fetch current stock first to avoid going below zero
-          const { data: prod } = await supabase
-            .from("products")
-            .select("stock_qty")
-            .eq("id", item.product.id)
-            .single();
-
-          if (prod && prod.stock_qty > 0) {
-            await supabase
-              .from("products")
-              .update({ stock_qty: Math.max(0, prod.stock_qty - item.qty) })
-              .eq("id", item.product.id);
-          }
-        } catch (e) {
-          console.error(
-            "Stock decrement failed for product",
-            item.product.id,
-            e,
-          );
-          // Never block the success flow — stock sync is best-effort
-        }
-      }
+  const handleProceed = async () => {
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
     }
+    setSaving(true);
+
+    const ref = generateRef();
 
     try {
-      await fetch(
-        "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-order-email",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
-    } catch (e) {
-      console.error("Order email failed:", e);
-    }
-  };
+      // Create order with payment_status: unpaid
+      const { error } = await supabase.from("shop_orders").insert({
+        customer_name: form.name,
+        customer_email: form.email,
+        customer_phone: form.phone,
+        items: items.map((i) => ({
+          product_id: i.product.id,
+          name: i.product.name,
+          price: i.product.price,
+          qty: i.qty,
+        })),
+        fulfillment: form.fulfillment,
+        delivery_address:
+          form.fulfillment === "dispatch"
+            ? form.address
+            : `Pickup — ${form.branch}`,
+        delivery_fee: form.fulfillment === "dispatch" ? DELIVERY_FEE : 0,
+        paid_total: payable,
+        payment_ref: ref,
+        payment_method: "transfer",
+        payment_status: "unpaid",
+        status: "pending",
+      });
 
-  const submitQuoteOnlyOrder = async () => {
-    const errs = validate();
-    if (Object.keys(errs).length) {
-      setErrors(errs);
-      return;
-    }
-    setStep("paying");
-    await saveOrderAndNotify(null);
-    clearCart();
-    setStep("success");
-    // Notify ShopPage to refetch products since stock has changed
-    window.dispatchEvent(new CustomEvent("cec:checkout-success"));
-  };
+      setSaving(false);
 
-  const initMonnify = () => {
-    const errs = validate();
-    if (Object.keys(errs).length) {
-      setErrors(errs);
-      return;
-    }
-
-    setStep("paying");
-
-    const launch = () => {
-      const paymentRef = "CEC-" + Date.now();
-
-      if (!window.MonnifySDK) {
-        setErrors({
-          submit:
-            "Payment system failed to load. Please refresh and try again.",
-        });
-        setStep("form");
+      if (error) {
+        setErrors({ submit: `Could not create order: ${error.message}` });
         return;
       }
-
-      window.MonnifySDK.initialize({
-        amount: payableTotal,
-        currency: "NGN",
-        reference: paymentRef,
-        customerFullName: form.name,
-        customerEmail: form.email,
-        customerMobileNumber: form.phone,
-        apiKey: MONNIFY_API_KEY,
-        contractCode: MONNIFY_CONTRACT_CODE,
-        paymentDescription: "Corporate Eye Clinic — Shop Order",
-        isTestMode: MONNIFY_IS_TEST_MODE,
-        metadata: {
-          fulfillment: form.fulfillment,
-        },
-        paymentMethods: ["ACCOUNT_TRANSFER", "CARD", "USSD"],
-        onComplete: function (response) {
-          // Monnify returns paymentStatus: "PAID" on success
-          if (
-            response.paymentStatus === "PAID" ||
-            response.status === "SUCCESS"
-          ) {
-            saveOrderAndNotify(response.transactionReference || paymentRef)
-              .then(() => {
-                clearCart();
-                setStep("success");
-                window.dispatchEvent(new CustomEvent("cec:checkout-success"));
-              })
-              .catch((err) => {
-                console.error("Post-payment save failed:", err);
-                clearCart();
-                setStep("success");
-                window.dispatchEvent(new CustomEvent("cec:checkout-success"));
-              });
-          } else {
-            setErrors({
-              submit: "Payment was not completed. Please try again.",
-            });
-            setStep("form");
-          }
-        },
-        onClose: function () {
-          setStep("form");
-        },
+    } catch (err) {
+      setSaving(false);
+      setErrors({
+        submit: "Network error. Please check your connection and try again.",
       });
-    };
-
-    const existingScript = document.getElementById("monnify-script");
-    if (existingScript && window.MonnifySDK) {
-      launch();
       return;
     }
-    const script = document.createElement("script");
-    script.id = "monnify-script";
-    script.src = "https://sdk.monnify.com/plugin/monnify.js";
-    script.onload = launch;
-    script.onerror = () => {
-      setErrors({
-        submit:
-          "Could not load payment system. Check your connection and try again.",
-      });
-      setStep("form");
-    };
-    document.body.appendChild(script);
-  };
 
-  const handleSubmit = () => {
-    if (payableTotal > 0) {
-      initMonnify();
-    } else {
-      submitQuoteOnlyOrder();
-    }
+    // Fire order email (non-blocking)
+    fetch(
+      "https://cacniprnjuwuavhhfowu.supabase.co/functions/v1/send-order-email",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg",
+        },
+        body: JSON.stringify({
+          customer_name: form.name,
+          customer_email: form.email,
+          customer_phone: form.phone,
+          items: items.map((i) => ({
+            name: i.product.name,
+            price: i.product.price,
+            qty: i.qty,
+          })),
+          fulfillment:
+            form.fulfillment === "pickup"
+              ? `pickup — ${form.branch}`
+              : "dispatch",
+          delivery_fee: form.fulfillment === "dispatch" ? DELIVERY_FEE : 0,
+          paid_total: payable,
+          payment_ref: ref,
+          payment_method: "Bank Transfer",
+          delivery_address:
+            form.fulfillment === "dispatch" ? form.address : null,
+        }),
+      },
+    ).catch(() => {});
+
+    clearCart();
+    onConfirmed({ ref, amount: payable, name: form.name, email: form.email });
   };
 
   return (
-    <div
-      className="checkout-backdrop"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="checkout-modal" role="dialog" aria-modal="true">
-        <div className="checkout-modal__header">
-          <h2 className="checkout-modal__title">
-            {step === "success" ? "Order confirmed! 🎉" : "Checkout"}
-          </h2>
-          <button
-            className="checkout-modal__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <CloseIcon />
-          </button>
+    <div className="co-modal">
+      <div className="co-header">
+        <h2>Checkout</h2>
+        <button className="co-close" onClick={onClose}>
+          ✕
+        </button>
+      </div>
+
+      <div className="co-body">
+        {/* Order summary */}
+        <div className="co-section">
+          <p className="co-section-label">ORDER SUMMARY</p>
+          {items.map((item) => (
+            <div key={item.key} className="co-item-row">
+              <span>
+                {item.product.name} × {item.qty}
+              </span>
+              <span>{fmt(item.product.price * item.qty)}</span>
+            </div>
+          ))}
+          {form.fulfillment === "dispatch" && (
+            <div className="co-item-row co-item-row--fee">
+              <span>Delivery fee</span>
+              <span>{fmt(DELIVERY_FEE)}</span>
+            </div>
+          )}
+          <div className="co-total-row">
+            <span>Total</span>
+            <span>{fmt(payable)}</span>
+          </div>
         </div>
 
-        {step === "success" ? (
-          <div className="checkout-success">
-            <div className="checkout-success__icon">
-              <CheckIcon />
-            </div>
-            <h3>Thank you, {form.name}!</h3>
-            <p>
-              {hasQuoteItems ? (
-                <>
-                  Your order has been received. Our team will review any custom
-                  prescription items and contact you on{" "}
-                  <strong>{form.phone}</strong> with final pricing.
-                </>
-              ) : (
-                <>
-                  Your payment was successful. We'll contact you on{" "}
-                  <strong>{form.phone}</strong> to arrange{" "}
-                  {form.fulfillment === "pickup" ? "pickup" : "delivery"}.
-                </>
-              )}
-            </p>
-            <button className="btn btn--primary btn--lg" onClick={onClose}>
-              Done
+        {/* Customer details */}
+        <div className="co-section">
+          <p className="co-section-label">YOUR DETAILS</p>
+          <div className="co-field">
+            <label>Full name</label>
+            <input
+              className={`co-input${errors.name ? " err" : ""}`}
+              placeholder="John Doe"
+              disabled={saving}
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+            />
+            {errors.name && <p className="co-err">{errors.name}</p>}
+          </div>
+          <div className="co-field">
+            <label>Phone number</label>
+            <input
+              className={`co-input${errors.phone ? " err" : ""}`}
+              placeholder="08012345678"
+              disabled={saving}
+              value={form.phone}
+              onChange={(e) => set("phone", e.target.value)}
+            />
+            {errors.phone && <p className="co-err">{errors.phone}</p>}
+          </div>
+          <div className="co-field">
+            <label>Email address</label>
+            <input
+              className={`co-input${errors.email ? " err" : ""}`}
+              type="email"
+              placeholder="you@example.com"
+              disabled={saving}
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+            />
+            {errors.email && <p className="co-err">{errors.email}</p>}
+          </div>
+        </div>
+
+        {/* Fulfillment */}
+        <div className="co-section">
+          <p className="co-section-label">DELIVERY / PICKUP</p>
+          <div
+            className="co-toggle-row"
+            style={{
+              pointerEvents: saving ? "none" : "auto",
+              opacity: saving ? 0.5 : 1,
+            }}
+          >
+            <button
+              className={`co-toggle${form.fulfillment === "pickup" ? " active" : ""}`}
+              onClick={() => set("fulfillment", "pickup")}
+              disabled={saving}
+            >
+              📦 Pickup in-store
+            </button>
+            <button
+              className={`co-toggle${form.fulfillment === "dispatch" ? " active" : ""}`}
+              onClick={() => set("fulfillment", "dispatch")}
+              disabled={saving}
+            >
+              🚚 Delivery (+{fmt(DELIVERY_FEE)})
             </button>
           </div>
-        ) : (
-          <div className="checkout-modal__body">
-            {/* Order summary */}
-            <div className="checkout-summary">
-              <h3 className="checkout-summary__title">Order summary</h3>
-              <ul className="checkout-summary__items">
-                {items.map((i) => (
-                  <li key={i.key} className="checkout-summary__item">
-                    <span>
-                      {i.product.name}{" "}
-                      <span className="checkout-summary__qty">×{i.qty}</span>
-                      {i.options?.isQuote && (
-                        <span className="checkout-summary__quote-tag">
-                          Quote needed
-                        </span>
-                      )}
-                    </span>
-                    <span>
-                      {i.options?.isQuote ? "—" : fmt(i.product.price * i.qty)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              {deliveryFee > 0 && (
-                <div className="checkout-summary__delivery-fee">
-                  <span>🚚 Delivery fee</span>
-                  <span>{fmt(deliveryFee)}</span>
-                </div>
-              )}
-              <div className="checkout-summary__total">
-                <span>Total {hasQuoteItems && "(excl. quote items)"}</span>
-                <span>{fmt(payableTotal)}</span>
-              </div>
-              {hasQuoteItems && (
-                <p className="checkout-summary__quote-note">
-                  💬 Custom prescription pricing will be sent to you privately
-                  after review.
-                </p>
-              )}
-            </div>
-
-            {/* Customer + fulfillment details */}
-            <div className="checkout-form">
-              <h3 className="checkout-form__title">Your details</h3>
-
-              <div className="checkout-field">
-                <label>Full name *</label>
-                <input
-                  type="text"
-                  placeholder="Your full name"
-                  value={form.name}
-                  onChange={set("name")}
-                  className={errors.name ? "input--error" : ""}
-                />
-                {errors.name && (
-                  <span className="field-error">{errors.name}</span>
-                )}
-              </div>
-
-              <div className="checkout-field">
-                <label>Email address *</label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={set("email")}
-                  className={errors.email ? "input--error" : ""}
-                />
-                {errors.email && (
-                  <span className="field-error">{errors.email}</span>
-                )}
-              </div>
-
-              <div className="checkout-field">
-                <label>Phone number *</label>
-                <input
-                  type="tel"
-                  placeholder="+234 ..."
-                  value={form.phone}
-                  onChange={set("phone")}
-                  inputMode="numeric"
-                  className={errors.phone ? "input--error" : ""}
-                />
-                {errors.phone && (
-                  <span className="field-error">{errors.phone}</span>
-                )}
-              </div>
-
-              {/* Fulfillment toggle */}
-              <div className="checkout-field">
-                <label>How would you like to receive your order? *</label>
-                <div className="checkout-toggle-row">
-                  <button
-                    type="button"
-                    className={`checkout-toggle-btn${form.fulfillment === "pickup" ? " active" : ""}`}
-                    onClick={() =>
-                      setForm((f) => ({ ...f, fulfillment: "pickup" }))
-                    }
-                  >
-                    🏥 Pickup at clinic
-                  </button>
-                  <button
-                    type="button"
-                    className={`checkout-toggle-btn${form.fulfillment === "dispatch" ? " active" : ""}`}
-                    onClick={() =>
-                      setForm((f) => ({ ...f, fulfillment: "dispatch" }))
-                    }
-                  >
-                    🚚 Dispatch / Delivery
-                  </button>
-                </div>
-              </div>
-
-              {form.fulfillment === "pickup" ? (
-                <div className="checkout-field">
-                  <label>Pickup location *</label>
-                  <div
-                    className={`checkout-select-wrap${errors.location ? " checkout-select-wrap--error" : ""}`}
-                  >
-                    <select value={form.location} onChange={set("location")}>
-                      <option value="">Select location</option>
-                      {contactInfo.locations.map((loc) => (
-                        <option key={loc.name} value={loc.name}>
-                          {loc.name} — {loc.short}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronIcon />
-                  </div>
-                  {errors.location && (
-                    <span className="field-error">{errors.location}</span>
-                  )}
-                </div>
-              ) : (
-                <div className="checkout-field">
-                  <label>Delivery address *</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Enter your full delivery address"
-                    value={form.address}
-                    onChange={set("address")}
-                    className={errors.address ? "input--error" : ""}
-                  />
-                  {errors.address && (
-                    <span className="field-error">{errors.address}</span>
-                  )}
-                </div>
-              )}
-
-              <button
-                className="btn btn--primary btn--lg checkout-form__pay"
-                onClick={handleSubmit}
-                disabled={step === "paying"}
+          {form.fulfillment === "pickup" && (
+            <div className="co-field" style={{ marginTop: 12 }}>
+              <label>Select pickup branch</label>
+              <select
+                className={`co-input${errors.branch ? " err" : ""}`}
+                value={form.branch}
+                disabled={saving}
+                onChange={(e) => set("branch", e.target.value)}
               >
-                {step === "paying"
-                  ? "Processing…"
-                  : payableTotal > 0
-                    ? `Pay ${fmt(payableTotal)}`
-                    : "Submit order request"}
-              </button>
-
-              <p className="checkout-form__note">
-                <LockIcon />{" "}
-                {payableTotal > 0
-                  ? "Secured by Monnify. Your payment details are encrypted."
-                  : "No payment required — we will contact you with a quote."}
-              </p>
+                <option value="Head Office — Bodija">
+                  Head Office — Royal Mall, Bodija
+                </option>
+                <option value="Oluyole Branch">
+                  Oluyole Branch — Alaafin Avenue, Oluyole Estate
+                </option>
+                <option value="New Bodija Branch">
+                  New Bodija Branch — 3B Aare Avenue, New Bodija
+                </option>
+              </select>
+              {errors.branch && <p className="co-err">{errors.branch}</p>}
             </div>
-          </div>
-        )}
+          )}
+          {form.fulfillment === "dispatch" && (
+            <div className="co-field" style={{ marginTop: 12 }}>
+              <label>Delivery address</label>
+              <input
+                className={`co-input${errors.address ? " err" : ""}`}
+                placeholder="Full delivery address"
+                value={form.address}
+                disabled={saving}
+                onChange={(e) => set("address", e.target.value)}
+              />
+              {errors.address && <p className="co-err">{errors.address}</p>}
+            </div>
+          )}
+        </div>
+
+        {errors.submit && <p className="co-err">{errors.submit}</p>}
+      </div>
+
+      <div className="co-footer">
+        <p className="co-secure">🔒 Pay by bank transfer — verified by admin</p>
+        <button
+          className="co-btn-primary"
+          onClick={handleProceed}
+          disabled={saving}
+        >
+          {saving ? "Creating order…" : `Proceed to payment — ${fmt(payable)}`}
+        </button>
       </div>
     </div>
   );
 }
 
-const CloseIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-const CheckIcon = () => (
-  <svg
-    width="40"
-    height="40"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-    <polyline points="22 4 12 14.01 9 11.01" />
-  </svg>
-);
-const LockIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ display: "inline", marginRight: 4 }}
-  >
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-  </svg>
-);
-const ChevronIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-);
+// ── Step 2: Bank transfer details ─────────────────────────────────
+function BankTransferModal({ orderRef, amount, onPaid }) {
+  const [copied, setCopied] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
+  const copy = () => {
+    navigator.clipboard.writeText(ACCOUNT_NO);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePaid = async () => {
+    setConfirming(true);
+    // Mark as submitted — NOT verified
+    await supabase
+      .from("shop_orders")
+      .update({ payment_status: "submitted" })
+      .eq("payment_ref", orderRef);
+    setConfirming(false);
+    onPaid();
+  };
+
+  return (
+    <div className="co-modal">
+      <div className="co-header">
+        <h2>Complete Your Payment</h2>
+      </div>
+      <div className="co-body">
+        <div className="co-bank-amount">
+          <p className="co-bank-label">Transfer exactly</p>
+          <p className="co-bank-figure">{fmt(amount)}</p>
+        </div>
+
+        <div className="co-bank-card">
+          <div className="co-bank-row">
+            <span>Bank</span>
+            <strong>{BANK_NAME}</strong>
+          </div>
+          <div className="co-bank-row">
+            <span>Account Name</span>
+            <strong>{ACCOUNT_NAME}</strong>
+          </div>
+          <div className="co-bank-row">
+            <span>Account Number</span>
+            <div className="co-acct-wrap">
+              <strong className="co-acct-no">{ACCOUNT_NO}</strong>
+              <button className="co-copy-btn" onClick={copy}>
+                {copied ? "✓ Copied" : "Copy"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="co-ref-note">
+          <p>
+            Order reference: <strong>{orderRef}</strong>
+          </p>
+          <p>
+            Use this as your transfer narration so we can identify your payment.
+          </p>
+        </div>
+
+        <div className="co-warning">
+          ⚠️ Transfer the exact amount. After transferring, click the button
+          below.
+        </div>
+      </div>
+
+      <div className="co-footer">
+        <button
+          className="co-btn-primary"
+          onClick={handlePaid}
+          disabled={confirming}
+        >
+          {confirming ? "Submitting…" : "I've Made the Payment"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 3: WhatsApp receipt submission ───────────────────────────
+function PaymentSubmittedModal({ orderRef, amount, name, onClose }) {
+  const msg = encodeURIComponent(
+    `Hello Corporate Eye Clinic, I have made a bank transfer payment for Order ${orderRef} (${fmt(amount)}). Please find my payment receipt attached. Thank you.`,
+  );
+  const waLink = `https://wa.me/${WHATSAPP_NO}?text=${msg}`;
+
+  return (
+    <div className="co-modal">
+      <div className="co-header">
+        <h2>Payment Submitted ✅</h2>
+      </div>
+      <div className="co-body">
+        <div className="co-success-box">
+          <div className="co-success-icon">🎉</div>
+          <p className="co-success-title">Thank you, {name.split(" ")[0]}!</p>
+          <p className="co-success-sub">
+            Your payment has been submitted for verification.
+          </p>
+        </div>
+
+        <div className="co-bank-card">
+          <div className="co-bank-row">
+            <span>Order Reference</span>
+            <strong>{orderRef}</strong>
+          </div>
+          <div className="co-bank-row">
+            <span>Amount</span>
+            <strong>{fmt(amount)}</strong>
+          </div>
+          <div className="co-bank-row">
+            <span>Payment Status</span>
+            <strong style={{ color: "#A07200" }}>Awaiting Verification</strong>
+          </div>
+        </div>
+
+        <div className="co-whatsapp-note">
+          <p>
+            Please send your <strong>payment receipt</strong> to our WhatsApp so
+            we can verify your payment quickly.
+          </p>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="co-wa-btn"
+          >
+            💬 Send Receipt on WhatsApp
+          </a>
+        </div>
+
+        <p className="co-disclaimer">
+          Your order will only be confirmed after the clinic verifies your
+          payment. You will be notified by email once confirmed.
+        </p>
+      </div>
+      <div className="co-footer">
+        <button className="co-btn-ghost" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main export ───────────────────────────────────────────────────
+export default function CheckoutModal({ onClose }) {
+  const [step, setStep] = useState("form"); // form | transfer | submitted
+  const [orderData, setOrderData] = useState(null);
+
+  if (step === "form") {
+    return (
+      <div className="co-backdrop" onClick={onClose}>
+        <div onClick={(e) => e.stopPropagation()}>
+          <CheckoutForm
+            onClose={onClose}
+            onConfirmed={(data) => {
+              setOrderData(data);
+              setStep("transfer");
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "transfer") {
+    return (
+      <div className="co-backdrop">
+        <div>
+          <BankTransferModal
+            orderRef={orderData.ref}
+            amount={orderData.amount}
+            onPaid={() => setStep("submitted")}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="co-backdrop">
+      <div>
+        <PaymentSubmittedModal
+          orderRef={orderData.ref}
+          amount={orderData.amount}
+          name={orderData.name}
+          onClose={onClose}
+        />
+      </div>
+    </div>
+  );
+}
