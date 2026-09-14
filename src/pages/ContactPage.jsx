@@ -122,7 +122,7 @@ export default function ContactPage() {
         {/* Photo background */}
         <div className="contact-hero__photo-bg" aria-hidden="true">
           <img
-            src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=1600&q=85"
+            src="https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144775/oluyole-01-building-exterior_xkukhw.jpg"
             alt=""
           />
         </div>

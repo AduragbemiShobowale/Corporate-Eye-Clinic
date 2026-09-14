@@ -63,13 +63,52 @@ export default function Notifications() {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="admin-card admin-empty">
-          <p className="notif-empty-icon">🔔</p>
-          <p className="admin-empty-title">No notifications yet.</p>
-          <p className="admin-empty-body">
-            Low-stock alerts will appear here when a product drops to 3 units or
-            below.
+        <div
+          className="admin-card"
+          style={{ padding: "60px 32px", textAlign: "center" }}
+        >
+          <div style={{ fontSize: 56, marginBottom: 16, lineHeight: 1 }}>
+            🔔
+          </div>
+          <h3
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: "var(--navy-800)",
+              margin: "0 0 10px",
+            }}
+          >
+            No pending notifications
+          </h3>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--color-text-muted)",
+              maxWidth: 340,
+              margin: "0 auto",
+              lineHeight: 1.7,
+            }}
+          >
+            You're all caught up. Low-stock alerts will appear here
+            automatically when any product drops to 3 units or below.
           </p>
+          <div
+            style={{
+              marginTop: 24,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: 99,
+              padding: "8px 20px",
+            }}
+          >
+            <span style={{ fontSize: 14 }}>✅</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#166534" }}>
+              Everything looks good
+            </span>
+          </div>
         </div>
       ) : (
         <div className="notif-list">

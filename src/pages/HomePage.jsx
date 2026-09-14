@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { services, testimonials, faqs, conditions } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
@@ -8,18 +8,25 @@ import "./HomePage.css";
 
 const PHOTOS = {
   "eye-exam":
-    "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144771/methodist-road-07-phoropter-closeup_a7nxxc.jpg",
   glaucoma:
-    "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&q=80",
+    "https://images.unsplash.com/photo-1705357311681-17449eb278d1?w=600&q=80",
   contacts:
-    "https://images.unsplash.com/photo-1580752300992-559f8e0734e0?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789144771/methodist-road-09-optical-showroom-2_fttkzv.jpg",
   "low-vision":
-    "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789150946/low-vision-eye-examination_pkyuiy.png",
   pediatric:
-    "https://images.unsplash.com/photo-1597733336794-12d05021d510?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_3:4,w_600/v1789150956/pediatric-boy-trying-frames_cwotkv.jpg",
   industrial:
-    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789144769/methodist-road-11-phoropter-exam_csgpjl.jpg",
 };
+
+const HERO_PHOTOS = [
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789145272/oluyole-14-waiting-area_zld8vp.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144775/oluyole-01-building-exterior_xkukhw.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144776/methodist-road-04-optical-showroom_slupyg.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144772/methodist-road-08-consultation-room_oetxxa.jpg",
+];
 
 const VISION_IMG =
   "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&q=90";
@@ -101,14 +108,27 @@ export default function HomePage() {
 
 /* ─── Hero ─────────────────────────────────────────────────── */
 function HeroSection({ onBook }) {
+  const [activePhoto, setActivePhoto] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActivePhoto((i) => (i + 1) % HERO_PHOTOS.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section className="hero">
-      {/* Background photo */}
+      {/* Background photo — crossfading slideshow */}
       <div className="hero__photo-bg" aria-hidden="true">
-        <img
-          src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1600&q=85"
-          alt=""
-        />
+        {HERO_PHOTOS.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            className={i === activePhoto ? "is-active" : ""}
+          />
+        ))}
       </div>
       <div className="hero__photo-overlay" aria-hidden="true" />
       <div className="hero__gradient" aria-hidden="true" />
@@ -254,21 +274,21 @@ function WelcomeSection({ onBook }) {
         <div className="welcome__photo-grid reveal reveal--right" ref={imgRef}>
           <div className="welcome__photo welcome__photo--tall">
             <img
-              src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&q=80"
-              alt="Eye care consultation"
+              src="https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_500/v1789146974/methodist-road-16-doctor-fitting-phoropter_d4numg.jpg"
+              alt="Doctor fitting a phoropter during an eye exam"
             />
           </div>
           <div className="welcome__photo-col">
             <div className="welcome__photo">
               <img
-                src="https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&q=80"
-                alt="Eye examination"
+                src="https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_400/v1789144773/oluyole-03-optical-showroom_yph0ta.jpg"
+                alt="Our optical showroom at Oluyole"
               />
             </div>
             <div className="welcome__photo welcome__photo--badge">
               <img
-                src="https://res.cloudinary.com/dgde8cwjk/image/upload/v1780425302/download_ekzxzu.jpg"
-                alt="Optometry equipment"
+                src="https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_500/v1789144774/methodist-road-06-exam-in-progress_ark1lq.jpg"
+                alt="Doctor caring for a patient during an eye exam"
               />
               <div className="welcome__photo-label">
                 <span>20+</span> years of trusted care

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import TableSkeleton from "./TableSkeleton";
 import "./TablePage.css";
 
 const ROLE_BADGE = {
@@ -24,12 +25,7 @@ export default function StaffDirectory() {
       });
   }, []);
 
-  if (loading)
-    return (
-      <div className="admin-empty">
-        <p className="admin-empty-body">Loading…</p>
-      </div>
-    );
+  if (loading) return <TableSkeleton cols={8} rows={6} />;
 
   return (
     <div>

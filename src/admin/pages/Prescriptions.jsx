@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import TableSkeleton from "./TableSkeleton";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import "./TablePage.css";
 
@@ -259,9 +260,7 @@ export default function Prescriptions() {
 
       <div className="admin-card">
         {loading ? (
-          <div className="admin-empty">
-            <p className="admin-empty-body">Loading prescriptions…</p>
-          </div>
+          <TableSkeleton cols={8} rows={6} />
         ) : orders.length === 0 ? (
           <div className="admin-empty">
             <p className="admin-empty-title">No prescription orders found.</p>

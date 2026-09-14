@@ -13,7 +13,7 @@ export default function AboutPage() {
       <div className="page-hero about-page-hero">
         <div className="page-hero__photo" aria-hidden="true">
           <img
-            src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=1600&q=85"
+            src="https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144768/oluyole-08-exam-room-empty_ikvfb5.jpg"
             alt=""
           />
         </div>
@@ -80,8 +80,8 @@ function MissionSection() {
           </p>
           <p className="section-subtitle" style={{ marginBottom: "1rem" }}>
             We are conveniently located in Bodija, Ibadan, with additional
-            branches at Royal Mall Bodija and Oluyole Estate making
-            quality eye care accessible wherever you are in the city.
+            branches at Royal Mall Bodija and Oluyole Estate making quality eye
+            care accessible wherever you are in the city.
           </p>
           <p className="section-subtitle">
             Our reputation is our biggest asset. We only employ the finest

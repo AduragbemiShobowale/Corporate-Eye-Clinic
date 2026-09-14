@@ -6,17 +6,17 @@ import "./ServicesPage.css";
 
 const PHOTOS = {
   "eye-exam":
-    "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144771/methodist-road-07-phoropter-closeup_a7nxxc.jpg",
   glaucoma:
-    "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=700&q=80",
+    "https://images.unsplash.com/photo-1705357311681-17449eb278d1?w=700&q=80",
   contacts:
-    "https://images.unsplash.com/photo-1580752300992-559f8e0734e0?w=700&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144771/methodist-road-09-optical-showroom-2_fttkzv.jpg",
   "low-vision":
-    "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=700&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789150946/low-vision-eye-examination_pkyuiy.png",
   pediatric:
-    "https://images.unsplash.com/photo-1597733336794-12d05021d510?w=700&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_3:4,w_700/v1789150956/pediatric-boy-trying-frames_cwotkv.jpg",
   industrial:
-    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=700&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144769/methodist-road-11-phoropter-exam_csgpjl.jpg",
 };
 
 export default function ServicesPage() {
@@ -30,7 +30,7 @@ export default function ServicesPage() {
       <div className="page-hero">
         <div className="page-hero__photo" aria-hidden="true">
           <img
-            src="https://images.unsplash.com/photo-1516069677018-378515003435?w=1600&q=85"
+            src="https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144770/methodist-road-14-exam-room-equipment-2_c5a4ni.jpg"
             alt=""
           />
         </div>

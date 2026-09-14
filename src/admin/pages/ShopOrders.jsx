@@ -1,5 +1,6 @@
 import toast from "react-hot-toast";
 import React, { useEffect, useState } from "react";
+import TableSkeleton from "./TableSkeleton";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import "./TablePage.css";
@@ -44,28 +45,10 @@ const SUPABASE_URL = "https://cacniprnjuwuavhhfowu.supabase.co";
 const ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhY25pcHJuanV3dWF2aGhmb3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDYwODEsImV4cCI6MjA5NjE4MjA4MX0.UvpRbcH8Wq70tndFNqs9ygEiUXz4lKBd4Nzc-vg3jjg";
 
-// ── Payment Confirmation Modal ──────────────────────────────────
 function PaymentConfirmModal({ order, onConfirm, onCancel, loading }) {
   return (
     <div className="admin-modal-backdrop" onClick={onCancel}>
       <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-        <div
-          className="admin-modal-icon-wrap"
-          style={{ background: "#f0fdf4" }}
-        >
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#166534"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
         <h2 className="admin-modal-title">Confirm Payment</h2>
         <p className="admin-modal-body">
           Confirm you have received{" "}
@@ -107,30 +90,11 @@ function PaymentConfirmModal({ order, onConfirm, onCancel, loading }) {
   );
 }
 
-// ── Payment Reject Modal ─────────────────────────────────────────
 function PaymentRejectModal({ order, onReject, onCancel, loading }) {
   const [notes, setNotes] = React.useState("");
   return (
     <div className="admin-modal-backdrop" onClick={onCancel}>
       <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-        <div
-          className="admin-modal-icon-wrap"
-          style={{ background: "#fef2f2" }}
-        >
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#991b1b"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </div>
         <h2 className="admin-modal-title">Reject Payment</h2>
         <p className="admin-modal-body">
           Reject payment for order <strong>{order.payment_ref}</strong>? Stock
@@ -626,15 +590,21 @@ export default function ShopOrders() {
     load();
   }, [status]);
 
-  const [confirmModal, setConfirmModal] = React.useState(null);
-  const [rejectModal, setRejectModal] = React.useState(null);
-  const [paymentLoading, setPaymentLoading] = React.useState(false);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   async function confirmPayment(order) {
     setPaymentLoading(true);
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    // First ensure payment_status is submitted so the RPC works
+    await supabase
+      .from("shop_orders")
+      .update({ payment_status: "submitted" })
+      .eq("id", order.id)
+      .in("payment_status", ["unpaid"]);
     const { error } = await supabase.rpc("confirm_order_payment", {
       p_order_id: order.id,
       p_confirmed_by: user.id,
@@ -646,24 +616,37 @@ export default function ShopOrders() {
       return;
     }
     toast.success("Payment confirmed — order is now processing");
-    // Fire customer confirmation email
+    // Send confirmation email — non-blocking, order confirmed regardless
     if (order.customer_email && !order.customer_email.includes("@internal")) {
-      fetch(`${SUPABASE_URL}/functions/v1/send-payment-confirmed-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          customer_name: order.customer_name,
-          customer_email: order.customer_email,
-          payment_ref: order.payment_ref,
-          paid_total: order.paid_total,
-          items: order.items,
-          fulfillment: order.fulfillment,
-          delivery_address: order.delivery_address,
-        }),
-      }).catch(() => {});
+      supabase.functions
+        .invoke("send-payment-confirmed-email", {
+          body: {
+            customer_name: order.customer_name,
+            customer_email: order.customer_email,
+            payment_ref: order.payment_ref,
+            paid_total: order.paid_total,
+            items: order.items,
+            fulfillment: order.fulfillment,
+            delivery_address: order.delivery_address,
+          },
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.warn(
+              "Email not sent — check edge function is deployed:",
+              error.message,
+            );
+            toast(
+              "Order confirmed. Note: confirmation email could not be sent.",
+              {
+                icon: "⚠️",
+                style: { fontSize: 13 },
+              },
+            );
+          } else {
+            toast.success("Confirmation email sent to customer");
+          }
+        });
     }
     load();
   }
@@ -791,6 +774,7 @@ export default function ShopOrders() {
                 <th>Total</th>
                 <th>Status</th>
                 <th>Action</th>
+                <th>Verify Payment</th>
                 <th></th>
               </tr>
             </thead>
@@ -884,44 +868,13 @@ export default function ShopOrders() {
                           </span>
                         </div>
                       )}
-                      {o.payment_status === "verified" &&
-                        o.payment_confirmed_by && (
-                          <EditorStamp
-                            updatedBy={o.payment_confirmed_by}
-                            updatedAt={o.payment_confirmed_at}
-                            profileMap={profileMap}
-                          />
-                        )}
-                      {o.payment_status !== "verified" && (
-                        <EditorStamp
-                          updatedBy={o.status_updated_by}
-                          updatedAt={o.status_updated_at}
-                          profileMap={profileMap}
-                        />
-                      )}
+                      <EditorStamp
+                        updatedBy={o.status_updated_by}
+                        updatedAt={o.status_updated_at}
+                        profileMap={profileMap}
+                      />
                     </td>
                     <td>
-                      {o.payment_status === "submitted" && isSuperAdmin && (
-                        <div
-                          className="tp-action-btns"
-                          style={{ marginBottom: 8 }}
-                        >
-                          <button
-                            className="admin-btn admin-btn--primary tp-sm-btn"
-                            disabled={updating === o.id}
-                            onClick={() => setConfirmModal(o)}
-                          >
-                            ✓ Confirm Payment
-                          </button>
-                          <button
-                            className="admin-btn admin-btn--danger tp-sm-btn"
-                            disabled={updating === o.id}
-                            onClick={() => setRejectModal(o)}
-                          >
-                            ✗ Reject
-                          </button>
-                        </div>
-                      )}
                       {o.status === "cancellation_pending" && isSuperAdmin ? (
                         <div className="tp-action-btns">
                           <button
@@ -974,6 +927,94 @@ export default function ShopOrders() {
                       )}
                     </td>
                     <td>
+                      {o.payment_method === "transfer" &&
+                      !["verified", "rejected"].includes(o.payment_status) &&
+                      !["fulfilled", "cancelled", "shipped"].includes(
+                        o.status,
+                      ) &&
+                      isSuperAdmin ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 5,
+                          }}
+                        >
+                          <button
+                            style={{
+                              padding: "7px 12px",
+                              background: "#166534",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: 6,
+                              fontSize: 12,
+                              fontWeight: 700,
+                              fontFamily: "inherit",
+                              cursor: "pointer",
+                              width: "100%",
+                            }}
+                            disabled={updating === o.id}
+                            onClick={() => setConfirmModal(o)}
+                          >
+                            ✓ Confirm
+                          </button>
+                          <button
+                            style={{
+                              padding: "7px 12px",
+                              background: "#fef2f2",
+                              color: "#991b1b",
+                              border: "1px solid #fecaca",
+                              borderRadius: 6,
+                              fontSize: 12,
+                              fontWeight: 700,
+                              fontFamily: "inherit",
+                              cursor: "pointer",
+                              width: "100%",
+                            }}
+                            disabled={updating === o.id}
+                            onClick={() => setRejectModal(o)}
+                          >
+                            ✗ Reject
+                          </button>
+                        </div>
+                      ) : o.payment_status === "verified" ? (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#166534",
+                            background: "#f0fdf4",
+                            padding: "4px 8px",
+                            borderRadius: 99,
+                            border: "1px solid #bbf7d0",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          ✅ Verified
+                        </span>
+                      ) : o.payment_status === "rejected" ? (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#991b1b",
+                            background: "#fef2f2",
+                            padding: "4px 8px",
+                            borderRadius: 99,
+                            border: "1px solid #fecaca",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          ✗ Rejected
+                        </span>
+                      ) : (
+                        <span style={{ color: "#d1d5db", fontSize: 13 }}>
+                          —
+                        </span>
+                      )}
+                    </td>
+
+                    <td>
                       <button
                         className="tp-expand-btn"
                         onClick={() => setExpanded(isExpanded ? null : o.id)}
@@ -984,7 +1025,7 @@ export default function ShopOrders() {
                   </tr>,
                   isExpanded && (
                     <tr key={`${o.id}-exp`} className="tp-expanded-row">
-                      <td colSpan={8}>
+                      <td colSpan={9}>
                         <div className="tp-expanded-grid">
                           <div className="tp-expanded-field">
                             <label>Items ordered</label>

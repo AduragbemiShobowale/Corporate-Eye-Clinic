@@ -314,6 +314,14 @@ export default function Navbar() {
               Shop
             </NavLink>
             <NavLink
+              to="/locations"
+              className={({ isActive }) =>
+                `navbar__mobile-link${isActive ? " active" : ""}`
+              }
+            >
+              Locations
+            </NavLink>
+            <NavLink
               to="/contact"
               className={({ isActive }) =>
                 `navbar__mobile-link${isActive ? " active" : ""}`

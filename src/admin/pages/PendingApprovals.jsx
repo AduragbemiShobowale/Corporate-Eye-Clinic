@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import TableSkeleton from "./TableSkeleton";
 import "./TablePage.css";
 
 export default function PendingApprovals() {
@@ -212,9 +213,7 @@ export default function PendingApprovals() {
 
       <div className="admin-card">
         {loading ? (
-          <div className="admin-empty">
-            <p className="admin-empty-body">Loading…</p>
-          </div>
+          <TableSkeleton cols={8} rows={6} />
         ) : items.length === 0 ? (
           <div className="admin-empty">
             <p className="admin-empty-title">All clear.</p>

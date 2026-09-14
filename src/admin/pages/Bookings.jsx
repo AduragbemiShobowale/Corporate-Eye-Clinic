@@ -2,6 +2,7 @@ import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import TableSkeleton from "./TableSkeleton";
 import "./TablePage.css";
 import "./Bookings.css";
 
@@ -467,9 +468,7 @@ export default function Bookings() {
 
       <div className="admin-card">
         {loading ? (
-          <div className="admin-empty">
-            <p className="admin-empty-body">Loading bookings…</p>
-          </div>
+          <TableSkeleton cols={8} rows={6} />
         ) : bookings.length === 0 ? (
           <div className="admin-empty">
             <p className="admin-empty-title">No bookings found.</p>

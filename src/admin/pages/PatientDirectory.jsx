@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import TableSkeleton from "./TableSkeleton";
 import "./TablePage.css";
 
 export default function PatientDirectory() {
@@ -116,9 +117,7 @@ export default function PatientDirectory() {
 
       <div className="admin-card">
         {loading ? (
-          <div className="admin-empty">
-            <p className="admin-empty-body">Loading patients…</p>
-          </div>
+          <TableSkeleton cols={8} rows={6} />
         ) : error ? (
           <div className="admin-empty">
             <p className="admin-empty-title">Could not load patients</p>
