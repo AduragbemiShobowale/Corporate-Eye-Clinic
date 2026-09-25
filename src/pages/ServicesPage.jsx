@@ -2,6 +2,7 @@ import { useState } from "react";
 import { services } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import BookingModal from "../components/ui/BookingModal";
+import SEO from "../components/SEO";
 import "./ServicesPage.css";
 
 const PHOTOS = {
@@ -26,6 +27,11 @@ export default function ServicesPage() {
 
   return (
     <>
+      <SEO
+        path="/services"
+        title="Our Services"
+        description="Comprehensive eye exams, glaucoma management, contact lens fittings, low vision, pediatric and industrial eye care in Ibadan."
+      />
       {/* ── Photo Hero ── */}
       <div className="page-hero">
         <div className="page-hero__photo" aria-hidden="true">

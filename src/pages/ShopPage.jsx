@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import PrescriptionGlassesSection from "../components/ui/PrescriptionGlassesSection";
 import ContactLensPrescriptionSection from "../components/ui/ContactLensPrescriptionSection";
 import OrderRequestSuccessModal from "../components/ui/OrderRequestSuccessModal";
+import SEO from "../components/SEO";
 import "./ShopPage.css";
 
 const fmt = (n) => "₦" + n.toLocaleString("en-NG");
@@ -261,6 +262,11 @@ export default function ShopPage() {
 
   return (
     <>
+      <SEO
+        path="/shop"
+        title="Eyewear Shop"
+        description="Shop designer frames, contact lenses, and sunglasses from Corporate Eye Clinic — affordable prices, Ibadan-wide."
+      />
       {/* ── Photo Hero ── */}
       <div className="page-hero shop-page-hero">
         <div className="page-hero__photo" aria-hidden="true">

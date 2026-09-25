@@ -2,6 +2,7 @@ import { useState } from "react";
 import { contactInfo, hours, services } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { supabase } from "../lib/supabase";
+import SEO from "../components/SEO";
 import "./ContactPage.css";
 
 export default function ContactPage() {
@@ -13,6 +14,10 @@ export default function ContactPage() {
     location: "",
     date: "",
     message: "",
+    // Honeypot — real visitors never see or fill this field. Bots that
+    // auto-fill every input on the page will, and we quietly drop the
+    // submission below without giving them feedback either way.
+    website: "",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -48,6 +53,14 @@ export default function ContactPage() {
 
   const submit = async (e) => {
     e.preventDefault();
+
+    // Honeypot check — a filled hidden field means a bot, not a person.
+    // Pretend success so the bot doesn't learn to look for another way in.
+    if (form.website) {
+      setSubmitted(true);
+      return;
+    }
+
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
@@ -117,6 +130,11 @@ export default function ContactPage() {
 
   return (
     <>
+      <SEO
+        path="/contact"
+        title="Contact Us"
+        description="Get in touch with Corporate Eye Clinic — call, WhatsApp, or visit us at our Bodija or Oluyole branches in Ibadan."
+      />
       {/* ── Hero ── */}
       <div className="contact-hero">
         {/* Photo background */}
@@ -233,6 +251,21 @@ export default function ContactPage() {
               </div>
             ) : (
               <form className="contact__form" onSubmit={submit} noValidate>
+                {/* Honeypot field — hidden from real users via CSS, not
+                    via display:none/type=hidden (bots skip those). Left
+                    unlabelled and out of tab order. */}
+                <div className="contact__honeypot" aria-hidden="true">
+                  <label htmlFor="website">Website</label>
+                  <input
+                    id="website"
+                    name="website"
+                    type="text"
+                    value={form.website}
+                    onChange={handle}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
                 <div className="contact__form-row">
                   <div className="contact__field">
                     <label htmlFor="name">Full name *</label>

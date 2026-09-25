@@ -4,6 +4,7 @@ import { services, testimonials, faqs, conditions } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import BeforeAfterSlider from "../components/ui/BeforeAfterSlider";
 import BookingModal from "../components/ui/BookingModal";
+import SEO from "../components/SEO";
 import "./HomePage.css";
 
 const PHOTOS = {
@@ -101,6 +102,7 @@ export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
+      <SEO path="/" />
       <HeroSection onBook={() => setShowModal(true)} />
       <TrustBar />
       <WelcomeSection onBook={() => setShowModal(true)} />

@@ -26,6 +26,8 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import ShopPage from "./pages/ShopPage";
 import LocationsPage from "./pages/LocationsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsPage from "./pages/TermsPage";
 import PageError from "./pages/PageError";
 import ScrollToTop from "./components/layout/ScrollToTop";
 
@@ -227,6 +229,11 @@ export default function App() {
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="shop" element={<ShopPage />} />
                     <Route path="locations" element={<LocationsPage />} />
+                    <Route
+                      path="privacy-policy"
+                      element={<PrivacyPolicyPage />}
+                    />
+                    <Route path="terms" element={<TermsPage />} />
                     <Route path="*" element={<PageError />} />
                   </Routes>
                 </main>

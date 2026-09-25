@@ -3,12 +3,18 @@ import { Link } from "react-router-dom";
 import BookingModal from "../components/ui/BookingModal";
 import { team, stats } from "../data/siteData";
 import { useScrollReveal } from "../hooks/useScrollReveal";
+import SEO from "../components/SEO";
 import "./AboutPage.css";
 
 export default function AboutPage() {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
+      <SEO
+        path="/about"
+        title="About Us"
+        description="Corporate Eye Clinic has served Ibadan since 2001 — affordable, high-quality eye care across three branches. Meet our team."
+      />
       {/* ── Photo Hero (Eye Foundation style) ── */}
       <div className="page-hero about-page-hero">
         <div className="page-hero__photo" aria-hidden="true">

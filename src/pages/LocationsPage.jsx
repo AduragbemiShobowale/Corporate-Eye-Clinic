@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 import "./LocationsPage.css";
 
 /* Cloudinary delivery base — f_auto/q_auto keeps these fast on mobile */
@@ -203,6 +204,11 @@ export default function LocationsPage() {
 
   return (
     <div className="locations-page">
+      <SEO
+        path="/locations"
+        title="Our Locations"
+        description="Find Corporate Eye Clinic's branches in Bodija and Oluyole, Ibadan — photos, directions, and what to expect when you visit."
+      />
       <div className="locations-page__header">
         <span className="locations-soon__badge">Our Branches</span>
         <h1 className="locations-page__title">Visit Us in Ibadan</h1>

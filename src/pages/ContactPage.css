@@ -415,6 +415,15 @@
   flex-direction: column;
   gap: var(--space-5);
 }
+/* Honeypot — off-screen, not display:none, so it's invisible to real
+   visitors but still fillable (and thus a giveaway) for form-filling bots. */
+.contact__honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 .contact__form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

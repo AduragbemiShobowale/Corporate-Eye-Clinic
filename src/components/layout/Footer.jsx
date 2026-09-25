@@ -142,6 +142,10 @@ export default function Footer() {
             © {new Date().getFullYear()} Corporate Eye Clinic. All rights
             reserved.
           </span>
+          <span className="footer__bottom-links">
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms">Terms &amp; Conditions</Link>
+          </span>
           <span className="footer__slogan">Your vision, our priority</span>
         </div>
       </div>
