@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./LocationsPage.css";
 
@@ -182,9 +182,24 @@ function cldUrl(photo) {
   return `${CLD_BASE}/v${photo.v}/${photo.id}.jpg`;
 }
 
+/* Larger version for the full-view lightbox */
+function cldUrlLarge(photo) {
+  return `https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v${photo.v}/${photo.id}.jpg`;
+}
+
 export default function LocationsPage() {
   const [activeKey, setActiveKey] = useState(BRANCHES[0].key);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const active = BRANCHES.find((b) => b.key === activeKey);
+
+  const openLightbox = (i) => setLightboxIndex(i);
+  const closeLightbox = () => setLightboxIndex(null);
+  const showPrev = () =>
+    setLightboxIndex(
+      (i) => (i - 1 + active.photos.length) % active.photos.length,
+    );
+  const showNext = () =>
+    setLightboxIndex((i) => (i + 1) % active.photos.length);
 
   return (
     <div className="locations-page">
@@ -206,7 +221,10 @@ export default function LocationsPage() {
             className={`locations-page__tab${
               activeKey === b.key ? " locations-page__tab--active" : ""
             }`}
-            onClick={() => setActiveKey(b.key)}
+            onClick={() => {
+              setActiveKey(b.key);
+              closeLightbox();
+            }}
           >
             {b.label}
             {b.comingSoon && (
@@ -219,7 +237,17 @@ export default function LocationsPage() {
       {active.comingSoon ? (
         <ComingSoonPanel branchLabel={active.label} />
       ) : (
-        <PhotoGallery branch={active} />
+        <PhotoGallery branch={active} onPhotoClick={openLightbox} />
+      )}
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          branch={active}
+          index={lightboxIndex}
+          onClose={closeLightbox}
+          onPrev={showPrev}
+          onNext={showNext}
+        />
       )}
 
       <div className="locations-page__actions">
@@ -240,25 +268,168 @@ export default function LocationsPage() {
 }
 
 /* ─── Photo gallery — horizontal scroll-snap, swipe on mobile ──── */
-function PhotoGallery({ branch }) {
+function PhotoGallery({ branch, onPhotoClick }) {
   return (
     <div className="locations-gallery">
       <div className="locations-gallery__track">
         {branch.photos.map((photo, i) => (
-          <figure className="locations-gallery__card" key={photo.id}>
+          <figure
+            className="locations-gallery__card"
+            key={photo.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => onPhotoClick(i)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onPhotoClick(i);
+              }
+            }}
+          >
             <img
               src={cldUrl(photo)}
               alt={`${branch.label} — ${photo.caption}`}
               loading={i < 2 ? "eager" : "lazy"}
             />
+            <span className="locations-gallery__expand" aria-hidden="true">
+              <ExpandIcon />
+            </span>
             <figcaption>{photo.caption}</figcaption>
           </figure>
         ))}
       </div>
       <p className="locations-gallery__hint">
-        ← Swipe through {branch.photos.length} photos →
+        ← Swipe through {branch.photos.length} photos · tap to view full size →
       </p>
     </div>
+  );
+}
+
+/* ─── Lightbox — full-view, scrollable, with prev/next ──────────── */
+function Lightbox({ branch, index, onClose, onPrev, onNext }) {
+  const photo = branch.photos[index];
+
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onPrev();
+      if (e.key === "ArrowRight") onNext();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose, onPrev, onNext]);
+
+  return (
+    <div
+      className="locations-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${branch.label} photo, full view`}
+      onClick={onClose}
+    >
+      <button
+        className="locations-lightbox__close"
+        onClick={onClose}
+        aria-label="Close"
+      >
+        <CloseIcon />
+      </button>
+
+      <button
+        className="locations-lightbox__nav locations-lightbox__nav--prev"
+        onClick={(e) => {
+          e.stopPropagation();
+          onPrev();
+        }}
+        aria-label="Previous photo"
+      >
+        <ChevronIcon direction="left" />
+      </button>
+
+      <div
+        className="locations-lightbox__scroll"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={cldUrlLarge(photo)}
+          alt={`${branch.label} — ${photo.caption}`}
+        />
+        <p className="locations-lightbox__caption">{photo.caption}</p>
+      </div>
+
+      <button
+        className="locations-lightbox__nav locations-lightbox__nav--next"
+        onClick={(e) => {
+          e.stopPropagation();
+          onNext();
+        }}
+        aria-label="Next photo"
+      >
+        <ChevronIcon direction="right" />
+      </button>
+
+      <span className="locations-lightbox__count">
+        {index + 1} / {branch.photos.length}
+      </span>
+    </div>
+  );
+}
+
+function ExpandIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function ChevronIcon({ direction }) {
+  const d = direction === "left" ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6";
+  return (
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={d} />
+    </svg>
   );
 }
 

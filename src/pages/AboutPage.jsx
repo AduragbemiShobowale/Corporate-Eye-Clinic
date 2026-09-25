@@ -46,6 +46,7 @@ export default function AboutPage() {
       <MissionSection />
       <FunStatsSection />
       <TeamSection />
+      <MeetTheTeamSection />
       <LocationsSection />
       <CtaSection onBook={() => setShowModal(true)} />
       {showModal && <BookingModal onClose={() => setShowModal(false)} />}
@@ -217,8 +218,6 @@ function TeamSection() {
                 ) : (
                   <div className="about-team__avatar">{member.initials}</div>
                 )}
-                <div className="about-team__avatar-ring" aria-hidden="true" />
-                <span className="about-team__avatar-badge">👨‍⚕️</span>
               </div>
               <div className="about-team__info">
                 <h3 className="about-team__name">{member.name}</h3>
@@ -232,6 +231,72 @@ function TeamSection() {
                   ))}
                 </div>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Meet the Team ───────────────────────────────────────── */
+const STAFF = [
+  {
+    name: "Dr. Onoja G.",
+    role: "Chief Optometrist & Chief Medical Director",
+    branch: "Methodist Road",
+    photo:
+      "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_1:1,w_500/v1790348313/Methodist_Road_32_sqmzp9.jpg",
+  },
+  {
+    name: "Front Desk Officer",
+    role: "Patient Reception",
+    branch: "Methodist Road",
+    photo:
+      "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_1:1,w_500/v1790348313/Methodist_Road_44_byd040.jpg",
+  },
+  {
+    name: "Optometrist Consultant",
+    role: "Eye Care Specialist",
+    branch: "Methodist Road",
+    photo:
+      "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_1:1,w_500/v1790348314/Methodist_Road_47_mrlry8.jpg",
+  },
+  {
+    name: "Front Desk Officer",
+    role: "Patient Reception",
+    branch: "Oluyole",
+    photo:
+      "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_1:1,w_500/v1790348332/Oluyole_13_ulnn2t.jpg",
+  },
+  {
+    name: "Optometrist Consultant",
+    role: "Eye Care Specialist",
+    branch: "Oluyole",
+    photo:
+      "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_1:1,w_500/v1790348333/Oluyole_18_lu9jxi.jpg",
+  },
+];
+
+function MeetTheTeamSection() {
+  const ref = useScrollReveal({ threshold: 0.1 });
+  return (
+    <section className="section about-staff-section">
+      <div className="container">
+        <span className="section-label">The people behind the care</span>
+        <h2 className="section-title">Meet the team</h2>
+        <p className="section-subtitle" style={{ marginBottom: "2rem" }}>
+          The staff you'll actually meet at Methodist Road and Oluyole.
+        </p>
+        <div className="about-staff__grid stagger-children" ref={ref}>
+          {STAFF.map((s, i) => (
+            <div key={i} className="card about-staff__card">
+              <div className="about-staff__photo">
+                <img src={s.photo} alt={`${s.name}, ${s.role}`} />
+              </div>
+              <h3 className="about-staff__name">{s.name}</h3>
+              <p className="about-staff__role">{s.role}</p>
+              <span className="badge badge--teal">{s.branch}</span>
             </div>
           ))}
         </div>

@@ -8,15 +8,15 @@ const PHOTOS = {
   "eye-exam":
     "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144771/methodist-road-07-phoropter-closeup_a7nxxc.jpg",
   glaucoma:
-    "https://images.unsplash.com/photo-1705357311681-17449eb278d1?w=700&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/v1790345090/WhatsApp_Image_2026-09-18_at_1.32.01_PM_z3jum2.jpg",
   contacts:
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144771/methodist-road-09-optical-showroom-2_fttkzv.jpg",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/v1789145273/oluyole-15-customer-trying-glasses_qwi2fd.jpg",
   "low-vision":
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789150946/low-vision-eye-examination_pkyuiy.png",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/v1789144774/methodist-road-06-exam-in-progress_ark1lq.jpg",
   pediatric:
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_3:4,w_700/v1789150956/pediatric-boy-trying-frames_cwotkv.jpg",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/v1790345620/IMG_20170911_174007.jpg",
   industrial:
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144769/methodist-road-11-phoropter-exam_csgpjl.jpg",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789144769/methodist-road-11-phoropter-exam_csgpjl.jpg",
 };
 
 export default function ServicesPage() {

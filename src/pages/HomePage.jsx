@@ -10,22 +10,31 @@ const PHOTOS = {
   "eye-exam":
     "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_700/v1789144771/methodist-road-07-phoropter-closeup_a7nxxc.jpg",
   glaucoma:
-    "https://images.unsplash.com/photo-1705357311681-17449eb278d1?w=600&q=80",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1790345090/WhatsApp_Image_2026-09-18_at_1.32.01_PM_z3jum2.jpg",
   contacts:
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789144771/methodist-road-09-optical-showroom-2_fttkzv.jpg",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789145273/oluyole-15-customer-trying-glasses_qwi2fd.jpg",
   "low-vision":
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789150946/low-vision-eye-examination_pkyuiy.png",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789144774/methodist-road-06-exam-in-progress_ark1lq.jpg",
   pediatric:
-    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_3:4,w_600/v1789150956/pediatric-boy-trying-frames_cwotkv.jpg",
+    "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,c_fill,g_face,ar_3:4,w_600/v1790345620/IMG_20170911_174007.jpg",
   industrial:
     "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_600/v1789144769/methodist-road-11-phoropter-exam_csgpjl.jpg",
 };
 
 const HERO_PHOTOS = [
-  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789145272/oluyole-14-waiting-area_zld8vp.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/v1790346580/ChatGPT_Image_Sep_25_2026_03_26_24_PM_cjndr8.png",
   "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144775/oluyole-01-building-exterior_xkukhw.jpg",
   "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144776/methodist-road-04-optical-showroom_slupyg.jpg",
-  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144772/methodist-road-08-consultation-room_oetxxa.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789145273/oluyole-12-team-showroom_mnrgop.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144772/methodist-road-10-frames-display_frycdk.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144768/oluyole-08-exam-room-empty_ikvfb5.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/v1789144772/methodist-road-08-consultation-room_oetxxa.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/v1781973270/WhatsApp_Image_2026-06-17_at_1.08.59_PM_xi8vyn.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789145275/oluyole-11-showroom-activity_umtsd1.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144770/methodist-road-14-exam-room-equipment-2_c5a4ni.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/f_auto,q_auto,w_1600/v1789144773/oluyole-03-optical-showroom_yph0ta.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/v1781973264/WhatsApp_Image_2026-06-17_at_1.10.14_PM_1_i3a4q3.jpg",
+  "https://res.cloudinary.com/dgde8cwjk/image/upload/v1790346579/ChatGPT_Image_Sep_25_2026_03_28_54_PM_kzvzio.png",
 ];
 
 const VISION_IMG =
@@ -113,7 +122,7 @@ function HeroSection({ onBook }) {
   useEffect(() => {
     const id = setInterval(() => {
       setActivePhoto((i) => (i + 1) % HERO_PHOTOS.length);
-    }, 5000);
+    }, 4200);
     return () => clearInterval(id);
   }, []);
 
@@ -126,40 +135,12 @@ function HeroSection({ onBook }) {
             key={src}
             src={src}
             alt=""
+            loading={i === 0 ? "eager" : "lazy"}
             className={i === activePhoto ? "is-active" : ""}
           />
         ))}
       </div>
       <div className="hero__photo-overlay" aria-hidden="true" />
-      <div className="hero__gradient" aria-hidden="true" />
-
-      {/* ── Gold aurora sweep ── */}
-      <div className="hero__aurora" aria-hidden="true" />
-      <div className="hero__aurora-2" aria-hidden="true" />
-
-      {/* ── Light beams ── */}
-      <div className="hero__beam hero__beam--1" aria-hidden="true" />
-      <div className="hero__beam hero__beam--2" aria-hidden="true" />
-      <div className="hero__beam hero__beam--3" aria-hidden="true" />
-
-      {/* ── Floating gold particles ── */}
-      {[...Array(12)].map((_, i) => (
-        <div
-          key={i}
-          className={`hero__particle hero__particle--${i + 1}`}
-          aria-hidden="true"
-        />
-      ))}
-
-      {/* ── Decorative rings ── */}
-      <div className="hero__ring hero__ring--1" aria-hidden="true" />
-      <div className="hero__ring hero__ring--2" aria-hidden="true" />
-      <div className="hero__ring hero__ring--3" aria-hidden="true" />
-
-      {/* ── Ambient orbs ── */}
-      <div className="hero__orb hero__orb--1" aria-hidden="true" />
-      <div className="hero__orb hero__orb--2" aria-hidden="true" />
-      <div className="hero__orb hero__orb--3" aria-hidden="true" />
 
       <div className="container hero__inner">
         <div className="hero__content">
